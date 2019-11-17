@@ -4,6 +4,7 @@ var path = require('path');
 var fs = require('fs');
 var os = require('os');
 var qr_image = require("qr-image");
+const find = require('local-devices');
 
 /**
  * @param {string} basePath
@@ -149,8 +150,22 @@ module.exports = function (conf) {
         
     });
 
+    app.get('/localdevices', function(req, res){
+        find().then(devices => {
+            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            console.log(ip.split('::ffff:'));
+
+            var path = require('path');
+            var userName = process.env['USERPROFILE'].split(path.sep)[2];
+            var computerName = process.env['COMPUTERNAME'];
+
+            devices.computerName =  computerName;
+            devices.userName = userName;
+            res.json(devices);
+        });
+    });
+
     app.post('/', function(req, res) {
-        
         // Bug fix for when the filesFolderPath folder does not exists
         if (!!conf.filesFolderPath) {
             // For a path that can have multiple non existent folders.

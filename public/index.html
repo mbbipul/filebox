@@ -12,9 +12,10 @@
   <link rel="manifest" href="/icons/manifest.json">
   <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#006900">
   <meta name="theme-color" content="#006900">
-  
-  <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
-  
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+  <script src="https://pingendo.com/assets/bootstrap/bootstrap-4.0.0-alpha.6.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">  
   <style type="text/css">
   body {
     margin:0;
@@ -58,33 +59,8 @@
     font-family: monospace;
     line-height: 40px;
   }
-  
-  #fileToUploadButtonBox {
-    height: 65px;
-    padding-top: 20px;
-  }
-  #fileToUploadButton {
-    padding: 0;
-    width: 78px;
-    height: 22px;
-    margin: 0;
-    display: inline-block;
-    transform: scale(2);
-    cursor: pointer;
-    z-index: 100;
-  }
-  #fileToUploadButton .button-text {
-    font-size: 12px;
-    line-height: 22px;
-  }
-  #fileToUpload {
-    position: relative;
-    top:-22px;
-    margin: 0;
-    width: 78px;
-    height: 22px;
-    opacity: 0;
-  }
+
+
   .list-item {
     display: flex;
     align-items: flex-end;
@@ -98,6 +74,25 @@
     margin-left: -1.5rem;
     z-index: 2;
   }
+
+  .hiddenFileInput > input{
+  height: 100%;
+  width: 100;
+  opacity: 0;
+  cursor: pointer;
+}
+.hiddenFileInput{
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+  overflow: hidden;
+  
+  /*for the background, optional*/
+  background: center center no-repeat;
+  background-size: 75% 75%;
+  background-image:  url(https://img.icons8.com/color/32/000000/filled-sent.png)
+}
+
   </style>
   
 </head>
@@ -105,46 +100,59 @@
   
   <div class="container">
     <div class="row">
-      <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 text-center">
+      <div class="col-lg-8  col-md-8  col-sm-12 text-center">
         <h1 class="text-center"> File Sharing</h1>
         <img id="theQRCode" hidden>
         <h4 id="IPandPort"></h4>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-lg-4 col-lg-offset-4 col-md-6 col-md-offset-3 col-sm-12 text-center">
+        <div class="col-lg-8  col-md-6 col-md-offset-3 col-sm-12 text-center">
         
-        <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
-          <p> Drag file in page or click below: </p>
-          <div id="fileToUploadButtonBox">
-            <div id="fileToUploadButton" class="btn btn-primary">
-              <span class="button-text">Choose File</span>
-              <input type="file" name="fileToUpload" id="fileToUpload">
+          <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
+            <p> Drag file in page or click below: </p>
+            <div id="fileToUploadButtonBox">
+              <div id="fileToUploadButton" class="btn btn-primary">
+                <span class="button-text">Choose File</span>
+                <input type="file" name="fileToUpload" id="fileToUpload">
+              </div>
+            </div>
+          </form>
+          
+          <br>
+          
+          <div id="successPanel" class="panel panel-success hidden">
+            <div class="panel-body text-center">
+              <p class="text-success" style="margin:0;">File uploaded as "<span id="fileSuccessName"></span>"</p>
             </div>
           </div>
-        </form>
-        
-        <br>
-        
-        <div id="successPanel" class="panel panel-success hidden">
-          <div class="panel-body text-center">
-            <p class="text-success" style="margin:0;">File uploaded as "<span id="fileSuccessName"></span>"</p>
+          
+          <div id="errorPanel" class="panel panel-danger hidden">
+            <div class="panel-body text-center">
+              <p class="text-danger" style="margin:0;">File upload failed.</p>
+            </div>
           </div>
-        </div>
-        
-        <div id="errorPanel" class="panel panel-danger hidden">
-          <div class="panel-body text-center">
-            <p class="text-danger" style="margin:0;">File upload failed.</p>
+          
+          <br>
+          
+          <div id="fileList" class="list-group">
           </div>
+          
         </div>
-        
-        <br>
-        
-        <div id="fileList" class="list-group">
-        </div>
-        
+      </div>
+      <div class="col-lg-4  text-center ">
+        Connected Devices
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">device id</th>
+              <th scope="col">device ip</th>
+            </tr>
+          </thead>
+          <tbody id="local_device_list">
+
+          </tbody>
+        </table>
       </div>
     </div>
+
   </div>
   
   
@@ -168,9 +176,10 @@
       document.getElementById("theQRCode").setAttribute("src", "");
     }
   }
-  
+  updateLocalDeviceList();
   var previousFileNames = null;
   var fileList = document.getElementById('fileList');
+
   var updateFileList = function (fileNames, allowDeletion) {
     if (!(fileNames instanceof Array)) {
       fileList.innerHTML = "";
@@ -206,6 +215,54 @@
       }
       return true;
     }
+  }
+
+function updateLocalDeviceList(){
+  var xmlhttp = new XMLHttpRequest();
+
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var myArr = JSON.parse(this.responseText);
+      addrow(myArr);
+    }
+  };
+  xmlhttp.open("GET", "/localdevices", true);
+  xmlhttp.send();
+
+
+  }
+
+  function addrow(arr) {
+     var table_body = document.getElementById("local_device_list");
+     table_body.innerHTML = "";
+    arr.forEach(element => {
+            var row = document.createElement("tr");
+        //     <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
+        //   <div id="fileToUploadButtonBox">
+        //     <div id="fileToUploadButton" class="btn btn-primary">
+        //       <span class="hiddenFileInput">\
+        //       <input type="file" name="theFile"/>\
+        //       <i class="fas fa-paper-plane"></i>\
+        //     </span>
+        //     </div>
+        //   </div>
+        // </form>
+            var file_icon = '<form ref="uploadForm" id="uploadForm"\
+            action="" method="post" enctype="multipart/form-data">\
+          <div id="fileToUploadButtonBox">\
+            <div id="fileToUploadButton" >\
+              <span class="hiddenFileInput">\
+                <input type="file" name="fileToUpload" id="fileToUpload">\
+                <i class="fas fa-paper-plane"></i>\
+            </span>\
+            </div>\
+          </div>\
+        </form>';
+
+            var td = "<td>"+element.mac+"</td><td>"+element.ip+"</td><td>"+file_icon+"</td>";
+            row.innerHTML= td;
+            table_body.append(row);
+    });
   }
 
   var deleteFile =  function (fileName) {
@@ -248,6 +305,7 @@
   getServerInfo();
   setInterval(function () {
     getServerInfo();
+   // updateLocalDeviceList();
   },2000);
   
   
@@ -310,11 +368,12 @@
     
     var fileToUpload = document.getElementById('fileToUpload');
     fileToUpload.onchange = function (e) {
-      holder.className += " success";
+      holder.className += "success";
       setTimeout(function() {
         fileToUpload.form.submit();
       }, 1);
     }
+    
     
     </script>
   </body>
