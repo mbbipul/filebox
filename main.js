@@ -1,13 +1,15 @@
 const http = require('http');
 const fs =require('fs');
+var SSE = require('sse');
 
-var fileShare = require('./fileshare')({
+var filebox = require('./filebox')({
     filesFolderPath: (process.argv[3] || null),
     port: (process.argv[2] || process.env.PORT),
     allowDeletion: false,
     progressCallback: function(progress, fileName) {
         //TODO: connect to UI when writing the electron app.
         console.log("Progress: "+fileName+" "+Math.floor(progress)+"%");
+       
     },
     errorCallback: function (url, err) {
         if (err.status == 404) {
@@ -19,7 +21,7 @@ var fileShare = require('./fileshare')({
     }
 });
 
-var server = http.createServer(fileShare.app);
+var server = http.createServer(filebox.app);
 
 function onError(error) {
     if (error.syscall !== 'listen') {
@@ -27,8 +29,8 @@ function onError(error) {
     }
     
     var bind = typeof port === 'string'
-    ? 'Pipe ' + fileShare.port
-    : 'Port ' + fileShare.port;
+    ? 'Pipe ' + filebox.port
+    : 'Port ' + filebox.port;
     
     // handle specific listen errors with friendly messages
     switch (error.code) {
@@ -58,12 +60,12 @@ function onListening() {
     if(typeof addr === 'string'){
         console.log('Listening on pipe ' + addr);
     } else {
-        fileShare.addresses.forEach(function (address) {
+        filebox.addresses.forEach(function (address) {
             console.log('Listening on ' + address + ':' + addr.port);
         });
     }
 }
 
-server.listen(fileShare.port);
+server.listen(filebox.port);
 server.on('error', onError);
 server.on('listening', onListening);

@@ -5,10 +5,23 @@ var fs = require('fs');
 var os = require('os');
 var qr_image = require("qr-image");
 const find = require('local-devices');
-const mysql = require('mysql');
 var network = require('network');
 
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/";
 
+
+
+MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("fileshare");
+    
+    dbo.createCollection("sharing", function(err, res) {
+        if (err) throw err;
+        console.log("Collection created!");
+        db.close();
+      });
+});
 /**
  * @param {string} basePath
  * @param {string} relativePath
@@ -235,23 +248,16 @@ module.exports = function (conf) {
             var requestIp = ip.split('::ffff:').join("");
             console.log(fields);
             var destId = fields[0].destip;
-            var content = JSON.parse(fs.readFileSync('det.json', 'utf8'));
-            if (typeof(content[destId]) || typeof(content[destId][fileName]) == "undefined"){
-                var fileOb = {};
-                fileOb[fileName] = [requestIp];
-                content[destId] = fileOb;
-            }else{
-                content[destId][fileName].push(requestIp);
-            }
-            try{
-                var sourceUrls = "det.json";
-                fs.unlinkSync(sourceUrls);
-            }catch(err){
-                console.log(err);
-            }
-            console.log(content);
-            fs.writeFileSync('det.json', JSON.stringify(content));
-        
+            var share = { filename : fileName,sharehostid : requestIp,destip  : destId};
+            MongoClient.connect(url, function(err, db) {
+                if (err) throw err;
+                var dbo = db.db("fileshare");
+                dbo.collection("sharing").insertOne(share, function(err, res) {
+                    if (err) throw err;
+                    console.log("1 document inserted");
+                    db.close();
+                  });
+            });
             finalName = fileName;
             
         });
@@ -299,17 +305,38 @@ module.exports = function (conf) {
             
             var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             var requestIp = ip.split('::ffff:').join("");
-            var content = JSON.parse(fs.readFileSync('det.json', 'utf8'));
-            
-            if(!addresses.includes(requestIp)){
-                infowithfile.fileList = Object.keys(content[requestIp]);
-            }else{
-                infowithfile.fileList = foundPaths.map((foundPath) => {
-                    return path.relative(filesFolderPath, foundPath);
+            MongoClient.connect(url, function(err, db) {
+                if (err) throw err;
+                var dbo = db.db("fileshare");
+                var query = { $or: [ { destip: requestIp }, { destip: "all" } ] };
+                dbo.collection("sharing").find(query).toArray(function(err, result) {
+                  if (err) throw err;
+                  if(addresses.includes(requestIp)){
+                    infowithfile.fileList = foundPaths.map((foundPath) => {
+                        return path.relative(filesFolderPath, foundPath);
+                    });
+                    res.json(infowithfile);
+
+                  }else{
+                    var fname = [];
+                    result.forEach(element => {
+                        fname.push(element.filename);
+                    });
+                    dbo.collection("sharing").find({ sharehostid: requestIp }).toArray(function(err, result) {
+                        if (err) throw err;
+                        result.forEach(element => {
+                            fname.push(element.filename);
+                        });
+                        infowithfile.fileList = fname;
+                        res.json(infowithfile);
+
+                    });
+                  }
+                  db.close();
                 });
-            }
-           
-            res.json(infowithfile);
+            });
+
+            
         })
         
     });
