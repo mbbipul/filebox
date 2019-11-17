@@ -1,4 +1,5 @@
 const http = require('http');
+const fs =require('fs');
 
 var fileShare = require('./fileshare')({
     filesFolderPath: (process.argv[3] || null),
@@ -46,7 +47,14 @@ function onError(error) {
 
 function onListening() {
     var addr = server.address();
-    
+    try{
+        var sourceUrls = "file.json";
+        fs.unlinkSync(sourceUrls);
+    }catch(err){
+        console.log(err);
+    }
+    fs.writeFileSync('file.json', JSON.stringify(""));
+
     if(typeof addr === 'string'){
         console.log('Listening on pipe ' + addr);
     } else {

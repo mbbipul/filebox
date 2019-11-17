@@ -75,7 +75,7 @@
     z-index: 2;
   }
 
-  .hiddenFileInput > input{
+  .hiddenFileInput  .hide{
   height: 100%;
   width: 100;
   opacity: 0;
@@ -132,7 +132,7 @@
           
           <br>
           
-          <div id="fileList" class="list-group">
+          <div id="fileList" class="list-group launchPad">
           </div>
           
         </div>
@@ -191,7 +191,7 @@
     
     //TODO do this with document.createElement
     fileList.innerHTML = fileNames.map(function(fileName) {
-      return `<div class="list-item">
+      return `<div class="card ">
         <a target="_blank" href="./f/`+fileName+`" class="list-group-item" download>`+fileName+`</a>
         ${allowDeletion ? `<a class="list-group-item-close" href="javascript:void(0);" onclick="deleteFile('`+fileName+`')">&times;</a>` : ''}
       </div>`;
@@ -235,7 +235,26 @@ function updateLocalDeviceList(){
   function addrow(arr) {
      var table_body = document.getElementById("local_device_list");
      table_body.innerHTML = "";
-    arr.forEach(element => {
+     console.log(arr[1]);
+     var row = document.createElement("tr");
+     var ipToString = arr[1].split('.').join("");
+            var file_icon = '<form ref="uploadForm" id="uploadForm"\
+            action="" method="post" enctype="multipart/form-data">\
+          <div id="fileToUploadButtonBox">\
+            <div id="fileToUploadButton" >\
+              <span class="hiddenFileInput">\
+                <input type="text" hidden name="destip" value="'+arr[1]+'">\
+                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
+                <i class="fas fa-paper-plane"></i>\
+            </span>\
+            </div>\
+          </div>\
+        </form>';
+
+            var td = "<td>Host</td><td>"+arr[1]+"</td><td>"+file_icon+"</td>";
+            row.innerHTML= td;
+            table_body.append(row);
+     arr[0].forEach(element => {
             var row = document.createElement("tr");
         //     <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
         //   <div id="fileToUploadButtonBox">
@@ -247,12 +266,14 @@ function updateLocalDeviceList(){
         //     </div>
         //   </div>
         // </form>
+         var ipToString = element.ip.split('.').join("");
             var file_icon = '<form ref="uploadForm" id="uploadForm"\
             action="" method="post" enctype="multipart/form-data">\
           <div id="fileToUploadButtonBox">\
             <div id="fileToUploadButton" >\
               <span class="hiddenFileInput">\
-                <input type="file" name="fileToUpload" id="fileToUpload">\
+                <input type="text" hidden name="destip" value="'+element.ip+'">\
+                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
                 <i class="fas fa-paper-plane"></i>\
             </span>\
             </div>\
@@ -272,9 +293,9 @@ function updateLocalDeviceList(){
     request.send();
   }
   
-  var getServerInfo = function (callback) {
+  var getServerInfoWithFiles = function (callback) {
     var request = new XMLHttpRequest();
-    request.open('GET', '/info', true);
+    request.open('GET', '/infowithfile', true);
     
     var onError = function (caller) {
       //TODO check if offline (or server is down)
@@ -302,9 +323,9 @@ function updateLocalDeviceList(){
     request.send();
   }
   
-  getServerInfo();
+  getServerInfoWithFiles();
   setInterval(function () {
-    getServerInfo();
+    getServerInfoWithFiles();
    // updateLocalDeviceList();
   },2000);
   
@@ -374,6 +395,13 @@ function updateLocalDeviceList(){
       }, 1);
     }
     
+    function sendFile(id){
+      var fileToUpload = document.getElementById(id);
+        setTimeout(function() {
+          fileToUpload.form.submit();
+        }, 1);
+    }
+ 
     
     </script>
   </body>

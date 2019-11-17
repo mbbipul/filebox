@@ -5,6 +5,9 @@ var fs = require('fs');
 var os = require('os');
 var qr_image = require("qr-image");
 const find = require('local-devices');
+const mysql = require('mysql');
+var network = require('network');
+
 
 /**
  * @param {string} basePath
@@ -151,6 +154,7 @@ module.exports = function (conf) {
     });
 
     app.get('/localdevices', function(req, res){
+        
         find().then(devices => {
             var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             console.log(ip.split('::ffff:'));
@@ -161,11 +165,14 @@ module.exports = function (conf) {
 
             devices.computerName =  computerName;
             devices.userName = userName;
-            res.json(devices);
+            network.get_gateway_ip(function(err, ip) {
+                res.json([devices,ip]); // err may be 'No active network interface found.'
+            });
         });
     });
 
     app.post('/', function(req, res) {
+
         // Bug fix for when the filesFolderPath folder does not exists
         if (!!conf.filesFolderPath) {
             // For a path that can have multiple non existent folders.
@@ -183,7 +190,7 @@ module.exports = function (conf) {
                 fs.mkdirSync(filesFolderPath);
             }
         }
-    
+       
         var form = new formidable.IncomingForm();
         
         form.parse(req);
@@ -191,6 +198,13 @@ module.exports = function (conf) {
         var finalName,
             progress;
         
+        fields = [];
+        form.on('field', function(field, value) {
+            var ob = {};
+            ob[field] = value;
+            fields.push(ob);
+
+        });
         form.on('fileBegin', function (name, file){
             
             progress = 0;
@@ -217,6 +231,27 @@ module.exports = function (conf) {
             
             file.path = path.join(filesFolderPath, fileName);
             file.finalName = fileName;
+            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            var requestIp = ip.split('::ffff:').join("");
+            console.log(fields);
+            var destId = fields[0].destip;
+            var content = JSON.parse(fs.readFileSync('det.json', 'utf8'));
+            if (typeof(content[destId]) || typeof(content[destId][fileName]) == "undefined"){
+                var fileOb = {};
+                fileOb[fileName] = [requestIp];
+                content[destId] = fileOb;
+            }else{
+                content[destId][fileName].push(requestIp);
+            }
+            try{
+                var sourceUrls = "det.json";
+                fs.unlinkSync(sourceUrls);
+            }catch(err){
+                console.log(err);
+            }
+            console.log(content);
+            fs.writeFileSync('det.json', JSON.stringify(content));
+        
             finalName = fileName;
             
         });
@@ -239,9 +274,9 @@ module.exports = function (conf) {
 
     });
     
-    app.get('/info',function(req, res) {
-        
-        if(disable.info) {
+    app.get('/infowithfile',function(req, res) {
+
+        if(disable.infowithfile) {
             var err = new Error('Not Found');
             err.status = 404;
             res.send(err);
@@ -253,18 +288,28 @@ module.exports = function (conf) {
         res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
         res.setHeader('Access-Control-Allow-Credentials', true); // If needed
         
-        var info = {"addresses":addresses,"port":port,"allowDeletion":allowDeletion};
+        var infowithfile = {"addresses":addresses,"port":port,"allowDeletion":allowDeletion};
         
         if(disable.fileDownload){
-            res.json(info);
+            res.json(infowithfile);
             return;
         }
         
         recursiveReadDir(filesFolderPath).then((foundPaths) => {
-            info.fileList = foundPaths.map((foundPath) => {
-                return path.relative(filesFolderPath, foundPath);
-            })
-            res.json(info);
+            
+            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            var requestIp = ip.split('::ffff:').join("");
+            var content = JSON.parse(fs.readFileSync('det.json', 'utf8'));
+            
+            if(!addresses.includes(requestIp)){
+                infowithfile.fileList = Object.keys(content[requestIp]);
+            }else{
+                infowithfile.fileList = foundPaths.map((foundPath) => {
+                    return path.relative(filesFolderPath, foundPath);
+                });
+            }
+           
+            res.json(infowithfile);
         })
         
     });
