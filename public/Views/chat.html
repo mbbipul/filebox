@@ -10,41 +10,58 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
         <style>
 			* {
-  box-sizing: border-box;
-}
+				box-sizing: border-box;
+			}
 
-/* Create two equal columns that floats next to each other */
-.column {
-  float: left;
-  width: 50%;
-  padding: 10px;
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
+			/* Create two equal columns that floats next to each other */
+			.column {
+				float: left;
+				width: 50%;
+				padding-left: 12%;
+				padding-top: 20px;
+				color: white;
+				border-radius: 15px !important;
+				border: 1px solid blanchedalmond;
+				background-color: rgba(0,0,0,0.5);
+			}
+			.column span{
+				font-size: x-small;
+			}
+			/* Clear floats after the columns */
+			.row:after {
+				content: "";
+				display: table;
+				clear: both;
+			}
+			#btnContainer{
+				margin-top: 80px;
+			}
 /* Style the buttons */
-.btn {
-  border: none;
-  outline: none;
-  padding: 12px 16px;
-  background-color: #f1f1f1;
-  cursor: pointer;
-}
+		.btn_grid {
+			border-radius: 15px !important;
+			border: none;
+			outline: none;
+			padding: 12px 16px;
+			background-color: rgba(39, 32, 32, 0.192);
+			cursor: pointer;
+		}
 
-.btn:hover {
-  background-color: #ddd;
-}
+		.btn_grid:hover {
+			background-color: rgba(0,0,0,0.5);
+		}
 
-.btn.active {
-  background-color: #666;
-  color: white;
-}
+		.btn_grid.actives {
+			background-color: rgba(0,0,0,0.5);
+			color: white;
+		}
 
-            	body,html{
+		.filecart{
+			height: 430px;
+			border-radius: 15px !important;
+			overflow-y: auto;
+			white-space: nowrap;
+		}
+    	body,html{
 			height: 100%;
 			margin: 0;
 			background: #7F7FD5;
@@ -131,7 +148,7 @@
 			padding: 5px 10px;
 			margin-bottom: 15px !important;
 		}
-	.active{
+	.actives{
 			background-color: rgba(0,0,0,0.3);
 	}
 		.user_img{
@@ -274,7 +291,8 @@
 	<body>
 		<div class="container-fluid h-100">
 			<div class="row  h-100">
-				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
+				<div class="col-md-3 col-xl-3 chat">
+					<div class="card mb-sm-3 mb-md-0 contacts_card">
 					<div class="card-header">
 						<div class="input-group">
 							<input type="text" placeholder="Search..." name="" class="form-control search">
@@ -349,7 +367,7 @@
 					</div>
 					<div class="card-footer"></div>
 				</div></div>
-				<div class="col-md-8 col-xl-6 chat">
+				<div class="col-md-6 col-xl-5 chat">
 					<div class="card">
 						<div class="card-header msg_head">
 							<div class="d-flex bd-highlight">
@@ -454,34 +472,50 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-md-4 col-xl-3 ">
+				<div class="col-md-5 col-xl-4" >
 					
 					<div id="btnContainer">
-						<button class="btn" onclick="listView()"><i class="fa fa-bars"></i> List</button> 
-						<button class="btn active" onclick="gridView()"><i class="fa fa-th-large"></i> Grid</button>
+						<button class="btn_grid" onclick="listView()"><i class="fa fa-bars"></i> List</button> 
+						<button class="btn_grid actives" onclick="gridView()"><i class="fa fa-th-large"></i> Grid</button>
 					</div>
 					<br>
-					<div class="row">
-							<div class="column" style="background-color:#aaa;">
-							  <h2>Column 1</h2>
-							  <p>Some text..</p>
+					<div class="row filecart text-center">
+							<div class="column" style="background-image: url('/Views/bipul.jpg');background-repeat:no-repeat;background-size: contain;resize: both;">
+								<figure></figure>
+								<h4>IMG.jpg<span style="font-size: xx-small;margin-top:5px;">112MB</span></h4>
+							  <span>12-12-2019 </span>
 							</div>
-							<div class="column" style="background-color:#bbb;">
+						
+							<div class="column">
 							  <h2>Column 2</h2>
 							  <p>Some text..</p>
 							</div>
-						  </div>
-						  
-						  <div class="row">
-							<div class="column" style="background-color:#ccc;">
+						  <div class="column">
 							  <h2>Column 3</h2>
 							  <p>Some text..</p>
 							</div>
-							<div class="column" style="background-color:#ddd;">
+							<div class="column">
 							  <h2>Column 4</h2>
 							  <p>Some text..</p>
 							</div>
-						  </div>
+							<div class="column">
+									<h2>Column 1</h2>
+									<p>Some text..</p>
+								  </div>
+							  
+								  <div class="column">
+									<h2>Column 2</h2>
+									<p>Some text..</p>
+								  </div>
+								<div class="column">
+									<h2>Column 3</h2>
+									<p>Some text..</p>
+								  </div>
+								  <div class="column">
+									<h2>Column 4</h2>
+									<p>Some text..</p>
+								  </div>
+					 </div>
 				</div>
 			</div>
         </div>
@@ -512,15 +546,15 @@ function gridView() {
 }
 
 /* Optional: Add active class to the current button (highlight it) */
-var container = document.getElementById("btnContainer");
-var btns = container.getElementsByClassName("btn");
-for (var i = 0; i < btns.length; i++) {
-  btns[i].addEventListener("click", function() {
-    var current = document.getElementsByClassName("active");
-    current[0].className = current[0].className.replace(" active", "");
-    this.className += " active";
-  });
-}
+	var container = document.getElementById("btnContainer");
+	var btns = container.getElementsByClassName("btn_grid");
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].addEventListener("click", function() {
+			var current = document.getElementsByClassName("actives");
+			current[0].className = current[0].className.replace(" actives", "");
+			this.className += " actives";
+		});
+	}
         </script>
 	</body>
 </html>
