@@ -6,17 +6,32 @@ var os = require('os');
 var qr_image = require("qr-image");
 const find = require('local-devices');
 var network = require('network');
+const bodyParser = require('body-parser');
 
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/";
 
-
+// MongoClient.connect(url, function(err, db) {
+//     if (err) throw err;
+//     var dbo = db.db("fileshare");
+    
+//     dbo.collection("sharing", function(err, res) {
+//         if (err) throw err;
+//         console.log("Collection delete!");
+//         db.close();
+//       });
+// });
+const clientIp = (req) => {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    var requestIp = ip.split('::ffff:').join("");
+    return requestIp;
+};
 
 MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var dbo = db.db("fileshare");
     
-    dbo.createCollection("sharing", function(err, res) {
+    dbo.createCollection("sharings", function(err, res) {
         if (err) throw err;
         console.log("Collection created!");
         db.close();
@@ -139,7 +154,14 @@ module.exports = function (conf) {
     
     //For index. Basically app.get('/',...);
     app.use(express.static(publicPath));
-
+    app.set('views', __dirname + '/public/views');
+    app.engine('html', require('ejs').renderFile);
+    app.set('view engine', 'html');
+    
+    app.use(bodyParser.urlencoded({
+      extended: true
+    }));
+    app.use(bodyParser.json())
     //For downloading files
     if(!disable.fileDownload) app.use('/f',express.static(filesFolderPath));
 
@@ -183,13 +205,17 @@ module.exports = function (conf) {
             });
         });
     });
-
+    
+    app.get('/clientip', function(req,res) {
+        res.json(clientIp(req));
+    });
+    app.get("/chat",function(req,res){
+        res.render('chat.html');
+    });
     app.post('/', function(req, res) {
 
-        // Bug fix for when the filesFolderPath folder does not exists
         if (!!conf.filesFolderPath) {
-            // For a path that can have multiple non existent folders.
-            // Borrowed from: https://stackoverflow.com/a/41970204
+
             filesFolderPath.split(path.sep).reduce((currentPath, folder) => {
                 currentPath += folder + path.sep;
                 if (!fs.existsSync(currentPath)){
@@ -198,7 +224,6 @@ module.exports = function (conf) {
                 return currentPath;
             }, '');   
         } else {
-            // For the simple './files' path.
             if (!fs.existsSync(filesFolderPath)){
                 fs.mkdirSync(filesFolderPath);
             }
@@ -244,15 +269,14 @@ module.exports = function (conf) {
             
             file.path = path.join(filesFolderPath, fileName);
             file.finalName = fileName;
-            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            var requestIp = ip.split('::ffff:').join("");
+            var requestIp = clientIp(req);
             console.log(fields);
             var destId = fields[0].destip;
             var share = { filename : fileName,sharehostid : requestIp,destip  : destId};
             MongoClient.connect(url, function(err, db) {
                 if (err) throw err;
                 var dbo = db.db("fileshare");
-                dbo.collection("sharing").insertOne(share, function(err, res) {
+                dbo.collection("sharings").insertOne(share, function(err, res) {
                     if (err) throw err;
                     console.log("1 document inserted");
                     db.close();
@@ -302,14 +326,12 @@ module.exports = function (conf) {
         }
         
         recursiveReadDir(filesFolderPath).then((foundPaths) => {
-            
-            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            var requestIp = ip.split('::ffff:').join("");
+            var requestIp = clientIp(req);
             MongoClient.connect(url, function(err, db) {
                 if (err) throw err;
                 var dbo = db.db("fileshare");
                 var query = { $or: [ { destip: requestIp }, { destip: "all" } ] };
-                dbo.collection("sharing").find(query).toArray(function(err, result) {
+                dbo.collection("sharings").find(query).toArray(function(err, result) {
                   if (err) throw err;
                   if(addresses.includes(requestIp)){
                     infowithfile.fileList = foundPaths.map((foundPath) => {
@@ -322,7 +344,7 @@ module.exports = function (conf) {
                     result.forEach(element => {
                         fname.push(element.filename);
                     });
-                    dbo.collection("sharing").find({ sharehostid: requestIp }).toArray(function(err, result) {
+                    dbo.collection("sharings").find({ sharehostid: requestIp }).toArray(function(err, result) {
                         if (err) throw err;
                         result.forEach(element => {
                             fname.push(element.filename);

@@ -2,18 +2,18 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Node.js LAN File Sharing</title>
+  <title>File Box</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   
   <link rel="icon" type="image/png" href="/icons/icons8-box-64.png" sizes="32x32">
   <link rel="icon" type="image/png" href="/icons/icons8-box-64.png" sizes="16x16">
-
-  <meta name="theme-color" content="#4b0596">
-  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
-  <script src="https://pingendo.com/assets/bootstrap/bootstrap-4.0.0-alpha.6.min.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">  
+  <link href="/fontawesome-free-5.11.2-web/css/all.min.css" rel="stylesheet"> <!--load all styles -->
+    <meta name="theme-color" content="#4b0596">
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/tether.min.js"></script>
+  <script src="/js/bootstrap-4.0.0-alpha.6.min.js"></script>
+  <link rel="stylesheet" href="/css/bootstrap2.min.css" >  
   <style type="text/css">
   body {
     margin-top:30px;
@@ -91,7 +91,7 @@
   /*for the background, optional*/
   background: center center no-repeat;
   background-size: 75% 75%;
-  background-image:  url(https://img.icons8.com/color/32/000000/filled-sent.png)
+  background-image:  url(/icons/filled-sent.png)
 }
 
 input#fileToUpload {
@@ -103,7 +103,7 @@ input#fileToUpload {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  background: url('https://cdn1.iconfinder.com/data/icons/hawcons/32/698394-icon-130-cloud-upload-512.png') center center no-repeat #e4e4e4;
+  background: url('/icons/698394-icon-130-cloud-upload-512.png') center center no-repeat #e4e4e4;
   border-radius: 20px;
   background-size: 60px 60px;
 }
@@ -113,13 +113,23 @@ input#fileToUpload {
 <body>
   
   <div class="container">
+      <h1 class="text-center"> File Box</h1> 
+
     <div class="row">
-      <div class="col-lg-8  col-md-8  col-sm-12 text-center">
-        <h1 class="text-center"> File Box</h1>
-        <img id="theQRCode" hidden>
-        <h4 id="IPandPort"></h4>
         <div class="col-lg-8  col-md-6 col-md-offset-3 col-sm-12 text-center">
-        
+          <div class="row">
+              <div class="col-lg-4 col-md-4 text-center">
+                  <h3>Server listening on</h3>
+                  <h4 id="IPandPort"></h4>
+              </div>
+              <div class="col-lg-4 col-md-4 text-center">
+                  <strong>Scan qr code in your mobile</strong>
+                  <img id="theQRCode" >
+              </div>
+              <div class="col-lg-4 col-md-4 text-center">
+                  <strong id="client_ip">your Ip</strong>
+              </div>
+           </div>
           <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
             <input type="text" name="destip" value="all" hidden>
 
@@ -146,7 +156,6 @@ input#fileToUpload {
           </div>
           
         </div>
-      </div>
       <div class="col-lg-4 text-center mt-4" >
         Connected Devices
         <table class="table">
@@ -165,7 +174,7 @@ input#fileToUpload {
 
   </div>
   
-  
+ 
   <div id="successoverlay">
     <span class="title noselect">&nbsp;&nbsp;&nbsp;Uploading...</span>
   </div>
@@ -177,11 +186,11 @@ input#fileToUpload {
   var IPandPort = document.getElementById('IPandPort');
   var updateAddress = function (addresses,port) {
     if(!(addresses instanceof Array)) return;
-    IPandPort.innerText = addresses.map(function (address) {
+    IPandPort.innerHTML = addresses.map(function (address) {
       return [address, port].join(":");
-    }).join(", ");
+    }).join("</br>");
     if(addresses.length > 0) {
-      document.getElementById("theQRCode").setAttribute("src", `/qr_codes/${addresses[0]}_${port}.png`)
+      document.getElementById("theQRCode").setAttribute("src", `/qr_codes/${addresses[1]}_${port}.png`)
     } else {
       document.getElementById("theQRCode").setAttribute("src", "");
     }
@@ -202,9 +211,9 @@ input#fileToUpload {
     //TODO do this with document.createElement
     fileList.innerHTML = fileNames.map(function(fileName) {
       return `<div class="card ">
-        <a target="_blank" href="./f/`+fileName+`" class="list-group-item" download>`+fileName+`</a>
+        <a target="_blank" href="./f/`+fileName+`" class="list-group-item dropdown" download>`+fileName+`<i style="float:right" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="fa fa-ellipsis-h"></i></a>
         ${allowDeletion ? `<a class="list-group-item-close" href="javascript:void(0);" onclick="deleteFile('`+fileName+`')">&times;</a>` : ''}
-      </div>`;
+        </div>`;
     }).join('');
     
     previousFileNames = fileNames;
@@ -226,6 +235,28 @@ input#fileToUpload {
       return true;
     }
   }
+
+
+const getClientIp = function(url, callback) // How can I use this callback?
+{
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+            callback(request.responseText); // Another callback here
+        }
+    }; 
+    request.open('GET', url);
+    request.send();
+}
+
+function clientCallback(data) {
+    data = JSON.parse(data);
+    document.getElementById('client_ip').innerText = data;
+}
+getClientIp('/clientip', clientCallback);
+
 
 function updateLocalDeviceList(){
   var xmlhttp = new XMLHttpRequest();
@@ -264,36 +295,28 @@ function updateLocalDeviceList(){
             var td = "<td>Host</td><td>"+arr[1]+"</td><td>"+file_icon+"</td>";
             row.innerHTML= td;
             table_body.append(row);
-     arr[0].forEach(element => {
+            arr[0].forEach(element => {
             var row = document.createElement("tr");
-        //     <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
-        //   <div id="fileToUploadButtonBox">
-        //     <div id="fileToUploadButton" class="btn btn-primary">
-        //       <span class="hiddenFileInput">\
-        //       <input type="file" name="theFile"/>\
-        //       <i class="fas fa-paper-plane"></i>\
-        //     </span>
-        //     </div>
-        //   </div>
-        // </form>
-         var ipToString = element.ip.split('.').join("");
-            var file_icon = '<form ref="uploadForm" id="uploadForm"\
-            action="" method="post" enctype="multipart/form-data">\
-          <div id="fileToUploadButtonBox">\
-            <div id="fileToUploadButton" >\
-              <span class="hiddenFileInput">\
-                <input type="text" hidden name="destip" value="'+element.ip+'">\
-                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
-                <i class="fas fa-paper-plane"></i>\
-            </span>\
-            </div>\
-          </div>\
-        </form>';
 
-            var td = "<td>"+element.mac+"</td><td>"+element.ip+"</td><td>"+file_icon+"</td>";
-            row.innerHTML= td;
-            table_body.append(row);
-    });
+              var ipToString = element.ip.split('.').join("");
+                  var file_icon = '<form ref="uploadForm" id="uploadForm"\
+                  action="" method="post" enctype="multipart/form-data">\
+                <div id="fileToUploadButtonBox">\
+                  <div id="fileToUploadButton" >\
+                    <span class="hiddenFileInput">\
+                      <input type="text" hidden name="destip" value="'+element.ip+'">\
+                      <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
+                      <i class="fas fa-paper-plane"></i>\
+                  </span>\
+                  </div>\
+                </div>\
+              </form>';
+
+                  var td = "<td>"+element.mac+"</td><td>"+element.ip+"</td><td>"+file_icon+"</td>";
+                  row.innerHTML= td;
+                  table_body.append(row);
+          });
+          
   }
 
   var deleteFile =  function (fileName) {
@@ -387,7 +410,7 @@ function updateLocalDeviceList(){
       || e.pageX <= 10 || e.pageX >= window.innerWidth-10
       || e.pageY <= 10 || e.pageY >= window.innerHeight-10) {
         fixButtonBack();
-      }
+    }
     }
     holder.ondrop = function (e) {
       if(e.target != fileToUpload){
