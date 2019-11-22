@@ -13,13 +13,56 @@
   <script src="/js/jquery-3.1.1.min.js"></script>
   <script src="/js/tether.min.js"></script>
   <script src="/js/bootstrap-4.0.0-alpha.6.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
   <link rel="stylesheet" href="/css/bootstrap2.min.css" >  
   <style type="text/css">
-  body {
-    margin-top:30px;
-    height: 100vh;
-    width: 100vw;
-  }
+  	body,html{
+			height: 100%;
+			margin: 0;
+			background: #7F7FD5;
+	       background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+	        background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+		}
+
+    #action_menu_btn{
+      position: inherit;
+      right: 10px;
+      top: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 20px;
+	}
+	.action_menu{
+    margin-top: 70px;
+		z-index: 1;
+    position: absolute;
+		padding: 15px 0;
+		background-color: rgba(0,0,0,0.5);
+		color: white;
+		border-radius: 15px;
+		top: 30px;
+		right: 15px;
+		display: none;
+	}
+	.action_menu ul{
+		list-style: none;
+		padding: 0;
+	  margin: 0;
+	}
+	.action_menu ul li{
+		width: 100%;
+		padding: 10px 15px;
+		margin-bottom: 5px;
+	}
+	.action_menu ul li i{
+		padding-right: 10px;
+	
+	}
+	.action_menu ul li:hover{
+		cursor: pointer;
+		background-color: rgba(0,0,0,0.2);
+	}
   .mt-4  {
     margin-top : 40px;
   }
@@ -77,14 +120,14 @@
   }
 
   .hiddenFileInput  .hide{
-  height: 100%;
-  width: 100;
+  height: 10%;
+  width: 80;
   opacity: 0;
   cursor: pointer;
 }
 .hiddenFileInput{
-  width: 50px;
-  height: 50px;
+  width: 20px;
+  height: 20px;
   display: inline-block;
   overflow: hidden;
   
@@ -179,6 +222,29 @@ input#fileToUpload {
     <span class="title noselect">&nbsp;&nbsp;&nbsp;Uploading...</span>
   </div>
   
+
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <form method="post" action="/editusername">  
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <input type="text" name="username" required class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    </div>
   <script type="text/javascript">
   
   /* Getting server info */
@@ -186,9 +252,10 @@ input#fileToUpload {
   var IPandPort = document.getElementById('IPandPort');
   var updateAddress = function (addresses,port) {
     if(!(addresses instanceof Array)) return;
-    IPandPort.innerHTML = addresses.map(function (address) {
-      return [address, port].join(":");
-    }).join("</br>");
+    IPandPort.innerHTML = addresses[1]+":8080";
+    // IPandPort.innerHTML = addresses.map(function (address) {
+    //   return [address, port].join(":");
+    // }).join("</br>");
     if(addresses.length > 0) {
       document.getElementById("theQRCode").setAttribute("src", `/qr_codes/${addresses[1]}_${port}.png`)
     } else {
@@ -286,13 +353,22 @@ function updateLocalDeviceList(){
               <span class="hiddenFileInput">\
                 <input type="text" hidden name="destip" value="'+arr[1]+'">\
                 <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
-                <i class="fas fa-paper-plane"></i>\
+                <i class="fas fa-share"></i>\
             </span>\
             </div>\
           </div>\
-        </form>';
+        </form>send file';
 
-            var td = "<td>Host</td><td>"+arr[1]+"</td><td>"+file_icon+"</td>";
+        var a ='<span id="action_menu_btn" onclick="toggleOption()"><i class="fas fa-ellipsis-v"></i></span>\
+							<div class="action_menu">\
+								<ul>\
+									<li>'+file_icon+'</li>\
+									<li data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-edit"></i>Edit your username</li>\
+									<li><i class="fas fa-comment"></i>Open Chat</li>\
+								</ul>\
+							</div>';
+
+            var td = "<td>Host</td><td>"+arr[1]+"</td><td>"+a+"</td>";
             row.innerHTML= td;
             table_body.append(row);
             arr[0].forEach(element => {
@@ -316,7 +392,7 @@ function updateLocalDeviceList(){
                   row.innerHTML= td;
                   table_body.append(row);
           });
-          
+
   }
 
   var deleteFile =  function (fileName) {
@@ -435,6 +511,9 @@ function updateLocalDeviceList(){
         }, 1);
     }
  
+      function toggleOption(){
+         $('.action_menu').toggle();
+      };
     
     </script>
   </body>

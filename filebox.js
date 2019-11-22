@@ -8,8 +8,8 @@ const find = require('local-devices');
 var network = require('network');
 const bodyParser = require('body-parser');
 
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/";
+const MongoClient = require('mongodb').MongoClient;
+const url = "mongodb://localhost:27017/";
 
 // MongoClient.connect(url, function(err, db) {
 //     if (err) throw err;
@@ -212,6 +212,25 @@ module.exports = function (conf) {
     app.get("/chat",function(req,res){
         res.render('chat.html');
     });
+
+    app.post('/editusername',function(req,res){
+        console.log(req.body.username)
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            
+            dbo.createCollection("users", function(err, res) {
+                if (err) throw err;
+                var myobj = { username: req.body.username, userip:  clientIp(req)};
+                dbo.collection("users").insertOne(myobj, function(err, res) {
+                    if (err) throw err;
+                    console.log(myobj);
+                    db.close();
+                });
+              });
+        });
+    });
+
     app.post('/', function(req, res) {
 
         if (!!conf.filesFolderPath) {
