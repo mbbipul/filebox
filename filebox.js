@@ -7,7 +7,6 @@ var qr_image = require("qr-image");
 const find = require('local-devices');
 var network = require('network');
 const bodyParser = require('body-parser');
-
 const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://localhost:27017/";
 
@@ -161,7 +160,7 @@ module.exports = function (conf) {
     app.set('views', __dirname + '/public/views');
     app.engine('html', require('ejs').renderFile);
     app.set('view engine', 'html');
-    
+
     app.use(bodyParser.urlencoded({
       extended: true
     }));
@@ -243,7 +242,71 @@ module.exports = function (conf) {
     app.get("/chat",function(req,res){
         res.render('chat.html');
     });
+    app.get('/getsharedfilesbyip/:ip',function(req,res){
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            dbo.collection("sharings").find(
+                {$and : [
+                    {sharehostid: clientIp(req)},
+                    {destip: req.params.ip}
+                ]}
+                ).toArray(function(err, result) {
+                if (err) throw err;
+                db.close();
+                 res.json(result);
+            });
 
+        });
+    });
+    
+    app.post('/getallmessagebyip/:ip',function(req,res){
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            var mysort = { date: -1 };
+            dbo.collection("chatroom").find(
+                {$or : [
+                    {$and : [
+                        {messageFrom: clientIp(req)},
+                        {messageTo: req.params.ip}
+                    ]},
+                    {
+                        $and : [
+                            {messageFrom:  req.params.ip},
+                            {messageTo: clientIp(req)}
+                        ]
+                    }
+                ]}
+                ).sort(mysort).toArray(function(err, result) {
+                if (err) throw err;
+                db.close();
+                 res.json(result);
+            });
+
+        });
+    });
+    app.post('/updatemessage',function(req,res){
+        console.log(req.body.message);
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            var msgInfo = {
+                messageFrom: clientIp(req),
+                messageTo : req.body.destip,
+                message : req.body.message,
+                date : new Date().getTime()
+            };
+            dbo.collection("chatroom").insertOne(msgInfo, function(err, res) {
+                if (err) throw err;
+                console.log("message sent");
+                db.close();
+              });
+
+            });
+
+        res.status(200);
+    });
     app.get("/getuserinfoforchatroom/:id",function (req,res) {
         MongoClient.connect(url, function(err, db) {
             if (err) throw err;
@@ -273,7 +336,7 @@ module.exports = function (conf) {
     });
 
     app.post('/', function(req, res) {
-
+        var ip;
         if (!!conf.filesFolderPath) {
 
             filesFolderPath.split(path.sep).reduce((currentPath, folder) => {
@@ -332,6 +395,7 @@ module.exports = function (conf) {
             var requestIp = clientIp(req);
             console.log(fields);
             var destId = fields[0].destip;
+            ip = destId;
             var share = { filename : fileName,sharehostid : requestIp,destip  : destId};
             MongoClient.connect(url, function(err, db) {
                 if (err) throw err;
@@ -347,7 +411,15 @@ module.exports = function (conf) {
         });
         
         form.on('file', function (name, file){
-            res.redirect('/?success=' + encodeURIComponent(file.finalName));
+            var destId = fields[0].destip;
+
+            var rt = req.get('referer').split("8080/")[1];
+            if(rt.includes('chat')){
+                res.redirect(req.get('referer')+'/'+destId);
+            }else{
+                res.redirect(req.get('referer')+'/?success=' + encodeURIComponent(file.finalName));
+            }
+            console.log();
         });
         
         form.on('error', function(err) {
