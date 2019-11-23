@@ -34,8 +34,12 @@ MongoClient.connect(url, function(err, db) {
     dbo.createCollection("sharings", function(err, res) {
         if (err) throw err;
         console.log("Collection created!");
-        db.close();
-      });
+        dbo.createCollection("chatroom", function(err, res) {
+            if (err) throw err;
+            console.log("chatroom created!");
+            db.close();
+        });
+    });
 });
 /**
  * @param {string} basePath
@@ -211,7 +215,7 @@ module.exports = function (conf) {
                     if (err) throw err;
                     var dbo = db.db("fileshare");
                     
-                    dbo.createCollection("users", function(err, res) {
+                    dbo.createCollection("users", function(err, response) {
                         if (err) throw err;
                         devices.forEach((element)=>{
                             dbo.collection("users").updateOne({"ip": element.ip}, 
@@ -219,14 +223,20 @@ module.exports = function (conf) {
                                 { upsert: true}
                             );
                         });
-                        
+                        MongoClient.connect(url, function(err, db) {
+                            if (err) throw err;
+                            dbo.collection("users").find({isActive: true}).toArray(function(err, result) {
+                              if (err) throw err;
+                              db.close();
+                              res.json([result,ip]);
+                            });
+
+                          });
                       });
                 }); // err may be 'No active network interface found.'
-                res.json([devices,ip]);
             });
         });
     });
-    
     app.get('/clientip', function(req,res) {
         res.json(clientIp(req));
     });
@@ -234,9 +244,32 @@ module.exports = function (conf) {
         res.render('chat.html');
     });
 
+    app.get("/getuserinfoforchatroom/:id",function (req,res) {
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            dbo.collection("users").find({ip: req.params.id}).toArray(function(err, result) {
+                if (err) throw err;
+                db.close();
+                 res.json(result);
+            });
+
+        });
+    });
+
     app.post('/editusername',function(req,res){
-        console.log(req.body.username)
-        
+        var ip_u = clientIp(req);
+        console.log(ip_u);
+        MongoClient.connect(url, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("fileshare");
+            dbo.collection("users").updateOne(
+                {"ip": ip_u}, 
+                {$set: {name : req.body.username}}, 
+                { upsert: false}
+            );
+            res.json("succes");
+        });
     });
 
     app.post('/', function(req, res) {

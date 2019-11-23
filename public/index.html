@@ -355,9 +355,9 @@ function updateLocalDeviceList(){
   function addrow(arr) {
     var table_body = document.getElementById("local_device_list");
     table_body.innerHTML = "";
-    addTableRows(arr[1],table_body);
+    addTableRows("Host",arr[1],table_body);
     arr[0].forEach(element => {
-      addTableRows(element.ip,table_body);
+      addTableRows(element.name,element.ip,table_body);
 
     });
   }
@@ -473,7 +473,7 @@ function updateLocalDeviceList(){
     
     
  
-      function addTableRows(ip,table_body){
+      function addTableRows(name,ip,table_body){
         var ipToString = ip.split('.').join("");
         var row = document.createElement("tr");
 
@@ -486,14 +486,14 @@ function updateLocalDeviceList(){
         var a ='<span id="action_menu_btn" \
         ><i class="fas fa-ellipsis-v" id="'+ipToString+'"></i></span>';
         
-            var td = "<td>Host</td><td>"+ip+"</td><td>"+a+"</td>";
+            var td = "<td>"+name+"</td><td>"+ip+"</td><td>"+a+"</td>";
             row.innerHTML= td;
             var row2 =document.createElement('tr');
             row2.id = ipToString;
             row2.setAttribute('hidden',true);
             row2.innerHTML = '<td>'+file_icon+'</td><td data-toggle="modal" data-target="#exampleModalCenter">\
               <i class="fas fa-edit" \
-              ></i></td><td><i class="fas fa-comment"></i></td>';
+              ></i></td><td><a href="/chat"><i class="fas fa-whatsapp"></i></a></td>';
             table_body.append(row);
             table_body.append(row2);
             var btn = document.getElementById(ipToString);
