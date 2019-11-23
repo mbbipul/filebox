@@ -150,6 +150,18 @@ input#fileToUpload {
   border-radius: 20px;
   background-size: 60px 60px;
 }
+
+.btn-upload {
+  position: relative;
+  overflow: hidden;
+}
+.btn-upload input {
+  position: absolute;
+  font-size: 10px;
+  opacity: 0;
+  right: 0;
+  top: 0;
+}
   </style>
   
 </head>
@@ -459,28 +471,17 @@ function updateLocalDeviceList(){
       }, 1);
     }
     
-    function sendFile(id){
-      var fileToUpload = document.getElementById(id);
-        setTimeout(function() {
-          fileToUpload.form.submit();
-        }, 1);
-    }
+    
  
       function addTableRows(ip,table_body){
         var ipToString = ip.split('.').join("");
         var row = document.createElement("tr");
 
-        var file_icon = '<form ref="uploadForm" id="uploadForm"\
-            action="" method="post" enctype="multipart/form-data">\
-          <div id="fileToUploadButtonBox">\
-            <div id="fileToUploadButton" >\
-              <span class="hiddenFileInput">\
-                <input type="text" hidden name="destip" value="'+ip+'">\
-                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
-            </span>\
-            </div>\
-          </div>\
-        </form>';
+        var file_icon = '<form  ref="uploadForm" id="uploadForm" action="" \
+        method="post" enctype="multipart/form-data">\
+            <input type="text" name="destip" value="'+ip+'" hidden>\
+            <i class="btn-upload fas fa-share"><input type="file"  name="fileToUpload" onchange="this.form.submit()" /></i>\
+          </form>';
 
         var a ='<span id="action_menu_btn" \
         ><i class="fas fa-ellipsis-v" id="'+ipToString+'"></i></span>';
@@ -490,9 +491,9 @@ function updateLocalDeviceList(){
             var row2 =document.createElement('tr');
             row2.id = ipToString;
             row2.setAttribute('hidden',true);
-            row2.innerHTML = '<td data-toggle="tooltip" data-placement="top" title="Send file ">'+file_icon+'</td><td data-toggle="modal" data-target="#exampleModalCenter">\
+            row2.innerHTML = '<td>'+file_icon+'</td><td data-toggle="modal" data-target="#exampleModalCenter">\
               <i class="fas fa-edit" \
-              data-toggle="tooltip" data-placement="top" title="Edit your username"></i></td><td  data-toggle="tooltip" data-placement="top" title="Open Chat Room"><a href="/chat"><i class="fas fa-comment"></i></a></td>';
+              ></i></td><td><i class="fas fa-comment"></i></td>';
             table_body.append(row);
             table_body.append(row2);
             var btn = document.getElementById(ipToString);
@@ -506,9 +507,14 @@ function updateLocalDeviceList(){
               }
             }, false);
       };
-      $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-      })
+
+      
+    function sendFile(id){
+      var fileToUpload = document.getElementById(id);
+        setTimeout(function() {
+          fileToUpload.form.submit();
+        }, 1);
+    }
     </script>
   </body>
   </html>
