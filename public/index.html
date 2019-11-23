@@ -36,7 +36,7 @@
 	.action_menu{
     margin-top: 70px;
 		z-index: 1;
-    position: absolute;
+    position: fixed;
 		padding: 15px 0;
 		background-color: rgba(0,0,0,0.5);
 		color: white;
@@ -126,8 +126,8 @@
   cursor: pointer;
 }
 .hiddenFileInput{
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   display: inline-block;
   overflow: hidden;
   
@@ -341,58 +341,13 @@ function updateLocalDeviceList(){
   }
 
   function addrow(arr) {
-     var table_body = document.getElementById("local_device_list");
-     table_body.innerHTML = "";
-     console.log(arr[1]);
-     var row = document.createElement("tr");
-     var ipToString = arr[1].split('.').join("");
-            var file_icon = '<form ref="uploadForm" id="uploadForm"\
-            action="" method="post" enctype="multipart/form-data">\
-          <div id="fileToUploadButtonBox">\
-            <div id="fileToUploadButton" >\
-              <span class="hiddenFileInput">\
-                <input type="text" hidden name="destip" value="'+arr[1]+'">\
-                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
-                <i class="fas fa-share"></i>\
-            </span>\
-            </div>\
-          </div>\
-        </form>send file';
+    var table_body = document.getElementById("local_device_list");
+    table_body.innerHTML = "";
+    addTableRows(arr[1],table_body);
+    arr[0].forEach(element => {
+      addTableRows(element.ip,table_body);
 
-        var a ='<span id="action_menu_btn" onclick="toggleOption()"><i class="fas fa-ellipsis-v"></i></span>\
-							<div class="action_menu">\
-								<ul>\
-									<li>'+file_icon+'</li>\
-									<li data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-edit"></i>Edit your username</li>\
-									<li><i class="fas fa-comment"></i>Open Chat</li>\
-								</ul>\
-							</div>';
-
-            var td = "<td>Host</td><td>"+arr[1]+"</td><td>"+a+"</td>";
-            row.innerHTML= td;
-            table_body.append(row);
-            arr[0].forEach(element => {
-            var row = document.createElement("tr");
-
-              var ipToString = element.ip.split('.').join("");
-                  var file_icon = '<form ref="uploadForm" id="uploadForm"\
-                  action="" method="post" enctype="multipart/form-data">\
-                <div id="fileToUploadButtonBox">\
-                  <div id="fileToUploadButton" >\
-                    <span class="hiddenFileInput">\
-                      <input type="text" hidden name="destip" value="'+element.ip+'">\
-                      <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
-                      <i class="fas fa-paper-plane"></i>\
-                  </span>\
-                  </div>\
-                </div>\
-              </form>';
-
-                  var td = "<td>"+element.mac+"</td><td>"+element.ip+"</td><td>"+file_icon+"</td>";
-                  row.innerHTML= td;
-                  table_body.append(row);
-          });
-
+    });
   }
 
   var deleteFile =  function (fileName) {
@@ -511,10 +466,49 @@ function updateLocalDeviceList(){
         }, 1);
     }
  
-      function toggleOption(){
-         $('.action_menu').toggle();
+      function addTableRows(ip,table_body){
+        var ipToString = ip.split('.').join("");
+        var row = document.createElement("tr");
+
+        var file_icon = '<form ref="uploadForm" id="uploadForm"\
+            action="" method="post" enctype="multipart/form-data">\
+          <div id="fileToUploadButtonBox">\
+            <div id="fileToUploadButton" >\
+              <span class="hiddenFileInput">\
+                <input type="text" hidden name="destip" value="'+ip+'">\
+                <input type="file" class="hide" name="fileToUpload" onchange="sendFile('+ipToString+')" id="'+ipToString+'" >\
+            </span>\
+            </div>\
+          </div>\
+        </form>';
+
+        var a ='<span id="action_menu_btn" \
+        ><i class="fas fa-ellipsis-v" id="'+ipToString+'"></i></span>';
+        
+            var td = "<td>Host</td><td>"+ip+"</td><td>"+a+"</td>";
+            row.innerHTML= td;
+            var row2 =document.createElement('tr');
+            row2.id = ipToString;
+            row2.setAttribute('hidden',true);
+            row2.innerHTML = '<td data-toggle="tooltip" data-placement="top" title="Send file ">'+file_icon+'</td><td data-toggle="modal" data-target="#exampleModalCenter">\
+              <i class="fas fa-edit" \
+              data-toggle="tooltip" data-placement="top" title="Edit your username"></i></td><td  data-toggle="tooltip" data-placement="top" title="Open Chat Room"><a href="/chat"><i class="fas fa-comment"></i></a></td>';
+            table_body.append(row);
+            table_body.append(row2);
+            var btn = document.getElementById(ipToString);
+            btn.addEventListener('click', function () {
+              if (row2.hasAttribute("hidden")) {
+                  $(row2).fadeIn( "slow" );
+                  $(row2).attr("hidden", false);
+              } else {
+                $(row2).fadeOut( "slow" );
+                $(row2).attr("hidden", true);
+              }
+            }, false);
       };
-    
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
     </script>
   </body>
   </html>

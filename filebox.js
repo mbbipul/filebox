@@ -191,17 +191,38 @@ module.exports = function (conf) {
     app.get('/localdevices', function(req, res){
         
         find().then(devices => {
-            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            console.log(ip.split('::ffff:'));
+            // var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            // console.log(ip.split('::ffff:'));
 
-            var path = require('path');
-            var userName = process.env['USERPROFILE'].split(path.sep)[2];
-            var computerName = process.env['COMPUTERNAME'];
+            // var path = require('path');
+            // var userName = process.env['USERPROFILE'].split(path.sep)[2];
+            // var computerName = process.env['COMPUTERNAME'];
 
-            devices.computerName =  computerName;
-            devices.userName = userName;
+            // devices.computerName =  computerName;
+            // devices.userName = userName;
+            devices = devices.map(function(el) {
+                var o = Object.assign({}, el);
+                o.isActive = true;
+                return o;
+            })
+              
             network.get_gateway_ip(function(err, ip) {
-                res.json([devices,ip]); // err may be 'No active network interface found.'
+                MongoClient.connect(url, function(err, db) {
+                    if (err) throw err;
+                    var dbo = db.db("fileshare");
+                    
+                    dbo.createCollection("users", function(err, res) {
+                        if (err) throw err;
+                        devices.forEach((element)=>{
+                            dbo.collection("users").updateOne({"ip": element.ip}, 
+                                {$setOnInsert: element}, 
+                                { upsert: true}
+                            );
+                        });
+                        
+                      });
+                }); // err may be 'No active network interface found.'
+                res.json([devices,ip]);
             });
         });
     });
@@ -215,20 +236,7 @@ module.exports = function (conf) {
 
     app.post('/editusername',function(req,res){
         console.log(req.body.username)
-        MongoClient.connect(url, function(err, db) {
-            if (err) throw err;
-            var dbo = db.db("fileshare");
-            
-            dbo.createCollection("users", function(err, res) {
-                if (err) throw err;
-                var myobj = { username: req.body.username, userip:  clientIp(req)};
-                dbo.collection("users").insertOne(myobj, function(err, res) {
-                    if (err) throw err;
-                    console.log(myobj);
-                    db.close();
-                });
-              });
-        });
+        
     });
 
     app.post('/', function(req, res) {
