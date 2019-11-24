@@ -17,7 +17,7 @@
 
   <link rel="stylesheet" href="/css/bootstrap2.min.css" >  
   <style type="text/css">
-  	body,html{
+ 	body,html{
 			height: 100%;
 			margin: 0;
 			background: #7F7FD5;
@@ -25,35 +25,208 @@
 	        background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
 		}
 
-    #action_menu_btn{
-      position: inherit;
-      right: 10px;
-      top: 10px;
-      color: white;
-      cursor: pointer;
-      font-size: 20px;
+		.chat{
+			margin-top: auto;
+			margin-bottom: auto;
+		}
+		.card{
+			height: 500px;
+			border-radius: 15px !important;
+			background-color: rgba(0,0,0,0.4) !important;
+		}
+		.contacts_body{
+			padding:  0.75rem 0 !important;
+			overflow-y: auto;
+			white-space: nowrap;
+		}
+		.msg_card_body{
+			overflow-y: auto;
+		}
+		.card-header{
+			border-radius: 15px 15px 0 0 !important;
+			border-bottom: 0 !important;
+		}
+	 .card-footer{
+		border-radius: 0 0 15px 15px !important;
+			border-top: 0 !important;
+	}
+		.container{
+			align-content: center;
+		}
+		.search{
+			border-radius: 15px 0 0 15px !important;
+			background-color: rgba(0,0,0,0.3) !important;
+			border:0 !important;
+			color:white !important;
+		}
+		.search:focus{
+		     box-shadow:none !important;
+           outline:0px !important;
+		}
+		.type_msg{
+			background-color: rgba(0,0,0,0.3) !important;
+			border:0 !important;
+			color:white !important;
+			height: 60px !important;
+			overflow-y: auto;
+		}
+			.type_msg:focus{
+		     box-shadow:none !important;
+           outline:0px !important;
+		}
+		.attach_btn{
+	border-radius: 15px 0 0 15px !important;
+	background-color: rgba(0,0,0,0.3) !important;
+			border:0 !important;
+			color: white !important;
+			cursor: pointer;
+		}
+		.send_btn{
+	border-radius: 0 15px 15px 0 !important;
+	background-color: rgba(0,0,0,0.3) !important;
+			border:0 !important;
+			color: white !important;
+			cursor: pointer;
+		}
+		.search_btn{
+			border-radius: 0 15px 15px 0 !important;
+			background-color: rgba(0,0,0,0.3) !important;
+			border:0 !important;
+			color: white !important;
+			cursor: pointer;
+		}
+		.contacts{
+			list-style: none;
+			padding: 0;
+		}
+		.contacts li{
+			width: 100% !important;
+			padding: 5px 10px;
+			margin-bottom: 15px !important;
+		}
+	.active{
+			background-color: rgba(0,0,0,0.3);
+	}
+		.user_img{
+			height: 70px;
+			width: 70px;
+			border:1.5px solid #f5f6fa;
+		
+		}
+		.user_img_msg{
+			height: 40px;
+			width: 40px;
+			border:1.5px solid #f5f6fa;
+		
+		}
+	.img_cont{
+			position: relative;
+			height: 70px;
+			width: 70px;
+	}
+	.img_cont_msg{
+			height: 40px;
+			width: 40px;
+	}
+	.online_icon{
+		position: absolute;
+		height: 15px;
+		width:15px;
+		border-radius: 50%;
+		bottom: 0.2em;
+		right: 0.4em;
+	}
+	.offline{
+		background-color: #c23616 !important;
+	}
+	.user_info{
+		margin-top: auto;
+		margin-bottom: auto;
+		margin-left: 15px;
+	}
+	.user_info span{
+		font-size: 20px;
+		color: white;
+	}
+	.user_info p{
+	font-size: 10px;
+	color: rgba(255,255,255,0.6);
+	}
+	.video_cam{
+		margin-left: 50px;
+		margin-top: 5px;
+	}
+	.video_cam span{
+		color: white;
+		font-size: 20px;
+		cursor: pointer;
+		margin-right: 20px;
+	}
+	.msg_cotainer{
+		margin-top: auto;
+		margin-bottom: auto;
+		margin-left: 10px;
+		border-radius: 25px;
+		background-color: #82ccdd;
+		padding: 10px;
+		position: relative;
+	}
+	.msg_cotainer_send{
+		margin-top: auto;
+		margin-bottom: auto;
+		margin-right: 10px;
+		border-radius: 25px;
+		background-color: #78e08f;
+		padding: 10px;
+		position: relative;
+	}
+	.msg_time{
+		position: absolute;
+		left: 0;
+		bottom: -15px;
+		color: rgba(255,255,255,0.5);
+		font-size: 10px;
+	}
+	.msg_time_send{
+		position: absolute;
+		right:0;
+		bottom: -15px;
+		color: rgba(255,255,255,0.5);
+		font-size: 10px;
+	}
+	.msg_head{
+		position: relative;
+	}
+	#action_menu_btn{
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		color: white;
+		cursor: pointer;
+		font-size: 20px;
 	}
 	.action_menu{
-    margin-top: 70px;
 		z-index: 1;
-    position: fixed;
-		padding: 15px 0;
+		position: absolute;
 		background-color: rgba(0,0,0,0.5);
 		color: white;
-		border-radius: 15px;
 		top: 30px;
-		right: 15px;
+		left: 80px;
+    width: 300px!important;
 		display: none;
+    border-radius: 10px;
+
 	}
 	.action_menu ul{
 		list-style: none;
 		padding: 0;
-	  margin: 0;
+	margin: 0;
 	}
 	.action_menu ul li{
 		width: 100%;
-		padding: 10px 15px;
 		margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 10px;
 	}
 	.action_menu ul li i{
 		padding-right: 10px;
@@ -63,6 +236,21 @@
 		cursor: pointer;
 		background-color: rgba(0,0,0,0.2);
 	}
+	@media(max-width: 576px){
+	.contacts_card{
+		margin-bottom: 15px !important;
+	}
+	}
+    #action_menu_btn{
+      position: inherit;
+      right: 10px;
+      top: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 20px;
+	}
+
+	
   .mt-4  {
     margin-top : 40px;
   }
@@ -173,17 +361,34 @@ input#fileToUpload {
     <div class="row">
         <div class="col-lg-8  col-md-6 col-md-offset-3 col-sm-12 text-center">
           <div class="row">
-              <div class="col-lg-4 col-md-4 text-center">
-                  <h3>Server listening on</h3>
-                  <h4 id="IPandPort"></h4>
+              <div class="col-lg-6 col-md-6 text-center">
+                  <div class="card-header msg_head" style="margin-top: 30px;">
+                      <div class="d-flex bd-highlight">
+                        <div class="img_cont">
+                          <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                          <i id="chnage_name_pic" class="online_icon fas fa-edit"></i>
+                          <div class="action_menu">
+                            <ul>
+                              <li><i class="fas fa-user-circle"></i>Change Profile Picture</li>
+                              <li data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-edit" ></i>Change Name</li>
+                            </ul>
+                          </div>
+                        </div>
+                        <div class="user_info">
+                          <span id="user_name"></span>
+                          <h6 id="client_ip"></h6>
+                        </div>
+        
+                      </div>
+        
+                    </div>
               </div>
-              <div class="col-lg-4 col-md-4 text-center">
-                  <strong>Scan qr code in your mobile</strong>
-                  <img id="theQRCode" >
-              </div>
-              <div class="col-lg-4 col-md-4 text-center">
-                  <strong id="client_ip">your Ip</strong>
-              </div>
+              <div class="col-lg-6 col-md-6 text-center">
+                  <strong>Hit this link 
+                    <span id="IPandPort"></span> or Scan qr code </strong>
+                  <img id="theQRCode" style="border-radius: 25px!important;height: 100px;">
+
+                </div>
            </div>
           <form ref='uploadForm' id='uploadForm' action="" method="post" enctype="multipart/form-data">
             <input type="text" name="destip" value="all" hidden>
@@ -207,7 +412,7 @@ input#fileToUpload {
           
           <br>
           
-          <div id="fileList" class="list-group launchPad">
+          <div id="fileList" class="list-group">
           </div>
           
         </div>
@@ -289,7 +494,7 @@ input#fileToUpload {
     
     //TODO do this with document.createElement
     fileList.innerHTML = fileNames.map(function(fileName) {
-      return `<div class="card ">
+      return `<div class=" ">
         <a target="_blank" href="./f/`+fileName+`" class="list-group-item dropdown" download>`+fileName+`<i style="float:right" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="fa fa-ellipsis-h"></i></a>
         ${allowDeletion ? `<a class="list-group-item-close" href="javascript:void(0);" onclick="deleteFile('`+fileName+`')">&times;</a>` : ''}
         </div>`;
@@ -491,9 +696,9 @@ function updateLocalDeviceList(){
             var row2 =document.createElement('tr');
             row2.id = ipToString;
             row2.setAttribute('hidden',true);
-            row2.innerHTML = '<td>'+file_icon+'</td><td data-toggle="modal" data-target="#exampleModalCenter">\
-              <i class="fas fa-edit" \
-              ></i></td><td><a href="/chat"><i class="fas fa-whatsapp"></i></a></td>';
+
+            row2.innerHTML = '<td scope="row">'+file_icon+'</td>\
+              <td colspan="2"><a class="text-dark " href="/chat?'+ip+'"><i class="fab fa-whatsapp"></i></a></td>';
             table_body.append(row);
             table_body.append(row2);
             var btn = document.getElementById(ipToString);
@@ -515,6 +720,30 @@ function updateLocalDeviceList(){
           fileToUpload.form.submit();
         }, 1);
     }
+    function updateUserInfo(id) {
+      var xmlhttp = new XMLHttpRequest();
+
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var user = JSON.parse(this.responseText);
+          console.log(user);
+          document.getElementById('user_name').innerText = user[0].name;
+        }
+      };
+      xmlhttp.open("GET", "/getuserinfoforchatroom/"+id, true);
+      xmlhttp.send();
+	  }
+    $(document).ready(function(){
+      $('#chnage_name_pic').click(function(){
+        $('.action_menu').toggle();
+      });
+      getClientIp('/clientip', updateUserInfoCallback);
+  });
+    function updateUserInfoCallback(data){
+        data = JSON.parse(data);
+        console.log(data);
+        updateUserInfo(data);
+      }
     </script>
   </body>
   </html>

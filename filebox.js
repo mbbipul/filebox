@@ -227,6 +227,16 @@ module.exports = function (conf) {
                             dbo.collection("users").find({isActive: true}).toArray(function(err, result) {
                               if (err) throw err;
                               db.close();
+                              var finalList = [];
+                              var i = 0;
+                              devices.forEach((device)=>{
+                                if(device.ip==result[i].ip){
+                                    finalList.push(result[i]);
+                                }else{
+                                    finalList.push(device);
+                                }
+                                i++;
+                              });
                               res.json([result,ip]);
                             });
 
@@ -331,7 +341,7 @@ module.exports = function (conf) {
                 {$set: {name : req.body.username}}, 
                 { upsert: false}
             );
-            res.json("succes");
+            res.redirect("/");
         });
     });
 

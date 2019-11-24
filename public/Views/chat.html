@@ -318,10 +318,10 @@
 						</div>
 					</div>
 					<div class="card-body contacts_body">
-						<ui class="contacts" id="chat_room_user_list">
+						<ul class="contacts" id="chat_room_user_list">
 						
 						
-						</ui>
+						</ul>
 					</div>
 					<div class="card-footer"></div>
 				</div></div>
@@ -371,10 +371,10 @@
                     });
 				});
 				// Get the elements with class="column"
-var elements = document.getElementsByClassName("column");
+			var elements = document.getElementsByClassName("column");
 
-// Declare a loop variable
-var i;
+			// Declare a loop variable
+			var i;
 
 // List View
 function listView() {
@@ -407,9 +407,22 @@ function gridView() {
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
 			var users = JSON.parse(this.responseText);
+				var userList = document.getElementById("chat_room_user_list");
+				userList.innerHTML = "";
 				users[0].forEach(user => {
-					addToChatList(user);
+					addToChatList(userList,user);
 				});
+				var openChatIp = getUrlVars();
+				openChatIp = openChatIp[0];
+				var element;
+				if(openChatIp!=null){
+					element = document.getElementById(openChatIp);
+					element.classList.add("submenu-active");
+					getUserInfoForOpenInChatRoom(openChatIp);
+					updateFileListByRoomId(openChatIp);
+					updateMessageRoom(openChatIp);
+
+				}
 				$('.contacts li').click(function (e) {
 					e.preventDefault();
 					$(this).closest('li').addClass('submenu-active').siblings().removeClass('submenu-active');
@@ -423,7 +436,7 @@ function gridView() {
 		xmlhttp.send();
 	}
 
-	function addToChatList(user){
+	function addToChatList(userList,user){
 		var content ='<div class="d-flex bd-highlight">\
 			<div class="img_cont">\
 			<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"\
@@ -435,7 +448,6 @@ function gridView() {
 				<p>'+user.ip+'</p>\
 				</div>\
 			</div>';
-		var userList = document.getElementById("chat_room_user_list");
 		var list_item = document.createElement("li");
 		list_item.id = user.ip;
 		list_item.innerHTML = content;
@@ -603,6 +615,18 @@ function gridView() {
 			request.send();
 	}
 	
+	function getUrlVars()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;
+	}
 	updateLocalDeviceList();
 
         </script>

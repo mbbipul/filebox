@@ -1,7 +1,6 @@
 const http = require('http');
-const fs =require('fs');
-var SSE = require('sse');
-
+const MongoClient = require('mongodb').MongoClient;
+const url = "mongodb://localhost:27017/";
 var filebox = require('./filebox')({
     filesFolderPath: (process.argv[3] || null),
     port: (process.argv[2] || process.env.PORT),
@@ -49,21 +48,32 @@ function onError(error) {
 
 function onListening() {
     var addr = server.address();
-    try{
-        var sourceUrls = "file.json";
-        fs.unlinkSync(sourceUrls);
-    }catch(err){
-        console.log(err);
-    }
-    fs.writeFileSync('file.json', JSON.stringify(""));
-
+    var servUser=[];
     if(typeof addr === 'string'){
         console.log('Listening on pipe ' + addr);
     } else {
         filebox.addresses.forEach(function (address) {
+            var user = {
+                ip: address,
+                isActive : true,
+                name : "?",
+                mac : "?"
+            };
+            servUser.push(user);
             console.log('Listening on ' + address + ':' + addr.port);
         });
     }
+    MongoClient.connect(url, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("fileshare");
+        
+        dbo.collection("users").insertMany(servUser, function(err, res) {
+            if (err) throw err;
+            console.log("added server user");
+            db.close();
+          });
+
+    });
 }
 
 server.listen(filebox.port);
