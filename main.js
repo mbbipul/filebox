@@ -56,7 +56,7 @@ function onListening() {
             var user = {
                 ip: address,
                 isActive : true,
-                name : "?",
+                name : address.split(".").join(""),
                 mac : "?"
             };
             servUser.push(user);
@@ -79,3 +79,36 @@ function onListening() {
 server.listen(filebox.port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+
+//socket.io instantiation
+const io = require("socket.io")(server)
+
+
+//listen on every connection
+io.on('connection', (socket) => {
+	console.log('New user connected')
+
+	//default username
+	socket.username = "Anonymous"
+
+    //listen on change_username
+    socket.on('change_username', (data) => {
+        socket.username = data.username;
+        console.log("change username"+data.username);
+    })
+
+    //listen on new_message
+    socket.on('new_message', (data) => {
+        //broadcast the new message
+        console.log("data recieved ")
+        console.log(data);
+        socket.emit('sending_message',data);
+        io.sockets.emit('new_message'+data.recv,data );
+    })
+
+    //listen on typing
+    socket.on('typing', (data) => {
+        io.sockets.emit('typing'+data.recv,data );
+    })
+})

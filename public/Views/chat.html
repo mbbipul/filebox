@@ -8,7 +8,9 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
-        <style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+
+		<style>
 			* {
 				box-sizing: border-box;
 			}
@@ -342,7 +344,7 @@
 							</div>
 						</div>
 						<div class="card-body msg_card_body" id="message_room">
-							
+							<div id="useristyping" hidden></div>
 											
 						</div>
 						<div class="card-footer" id="chat_room_footer">
@@ -364,7 +366,7 @@
 				</div>
 			</div>
         </div>
-        <script>
+    <script>
             	$(document).ready(function(){
                     $('#action_menu_btn').click(function(){
                         $('.action_menu').toggle();
@@ -415,20 +417,22 @@ function gridView() {
 				var openChatIp = getUrlVars();
 				openChatIp = openChatIp[0];
 				var element;
-				if(openChatIp!=null){
-					element = document.getElementById(openChatIp);
-					element.classList.add("submenu-active");
-					getUserInfoForOpenInChatRoom(openChatIp);
-					updateFileListByRoomId(openChatIp);
-					updateMessageRoom(openChatIp);
+				// if(openChatIp!=null){
+				// 	element = document.getElementById(openChatIp);
+				// 	element.classList.add("submenu-active");
+				// 	//getUserInfoForOpenInChatRoom(openChatIp);
+				// 	initializeSocketIo();
+				// 	updateFileListByRoomId(openChatIp);
+				// 	updateMessageRoom(openChatIp);
 
-				}
+				// }
 				$('.contacts li').click(function (e) {
 					e.preventDefault();
 					$(this).closest('li').addClass('submenu-active').siblings().removeClass('submenu-active');
 					getUserInfoForOpenInChatRoom(this.id);
 					updateFileListByRoomId(this.id);
 					updateMessageRoom(this.id);
+
 				});
 			}
 		};
@@ -467,7 +471,18 @@ function gridView() {
 		xmlhttp.send();
 	}
 
+
+		function clientCallback(data) {
+			data = JSON.parse(data);
+			data = data.split(".").join("");
+			console.log(data);
+			localStorage.setItem('usersocketname',data);
+
+		}
+
 	function updateChatRoom(user){
+		getClientIp('/clientip', clientCallback);
+
 		var chatRoomHeader = document.getElementById('chat_room_header');
 		var chatRoomFooter = document.getElementById('chat_room_footer');
 		var content = '<div class="img_cont">\
@@ -478,9 +493,7 @@ function gridView() {
 						<span>'+user.name+'</span>\
 						<p>1767 Messages</p>\
 					</div>';
-		var footer_content = '<form  method="post" enctype="multipart/form-data"\
-		 action="../" id="chatmsgsendform"> \
-								<div class="input-group">\
+		var footer_content = '<div class="input-group">\
 									<div class="input-group-append">\
 											<input type="text" name="destip" \
 											value="'+user.ip+'" hidden>\
@@ -488,39 +501,38 @@ function gridView() {
 											<i class=" btn-upload fas fa-paperclip">\
 												<input type="file" id="file_room"\
 												 name="file_room"  \
-												 onchange="this.form.submit()"/>\
+												 "/>\
 												 </i></span>\
 									</div>\
-								</form>\
-								<form method="post" id="send_text_msg">\
-										<input type="text" name="destip" \
-											value="'+user.ip+'" hidden>\
-									<textarea name="message" class="form-control type_msg" \
+										<input id="recieverip" type="text" name="destip" \
+											value="'+user.name+'" hidden>\
+									<textarea name="message" id="message" class="form-control type_msg" \
 									placeholder="Type your message..."></textarea>\
 									<div class="input-group-append">\
-										<span  class="input-group-text send_btn"><i class="fas fa-location-arrow"  id="send_icon"></i></span>\
+										<span  class="input-group-text "><button class="fas fa-location-arrow"  id="send_messageid"></button></span>\
 									</div>\
-								</div>\
-							</form>';
+								</div>';
 
 		chatRoomFooter.innerHTML = footer_content;
 		chatRoomHeader.innerHTML = content;
-		$("#send_icon").click(function() {
+		// $("#send_icon").click(function() {
 
-			var url = "/updatemessage"; // the script where you handle the form input.
+		// 	var url = "/updatemessage"; // the script where you handle the form input.
 
-			$.ajax({
-				type: "POST",
-				url: url,
-				data: $("#send_text_msg").serialize(), // serializes the form's elements.
-				success: function(data)
-				{
-					alert(data); // show response from the php script.
-				}
-				});
+		// 	$.ajax({
+		// 		type: "POST",
+		// 		url: url,
+		// 		data: $("#send_text_msg").serialize(), // serializes the form's elements.
+		// 		success: function(data)
+		// 		{
+		// 			alert(data); // show response from the php script.
+		// 		}
+		// 		});
 
-			return false; // avoid to execute the actual submit of the form.
-		});
+		// 	return false; // avoid to execute the actual submit of the form.
+		// });
+		initializeSocketIo(user.name);
+
 	}
 
 	function addFileToList(listr,file){
@@ -586,7 +598,6 @@ function gridView() {
 
 	}
 	function updateMessageRoom(ip){
-
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
@@ -628,7 +639,85 @@ function gridView() {
 		return vars;
 	}
 	updateLocalDeviceList();
+function initializeSocketIo(reciever){
+   	//make connection
+	var socket = io.connect('http://192.168.0.6:8080');
+	console.log(socket);
+	//buttons and inputs;
+	var message = $("#message");
+	var send_username =$("#send_messageid");
+	var send_message = $("#send_messageid");
+	var send_reciever_name = reciever;
+	var chatroom = $("#message_room");
+	var feedback = $("#feedback");
+	var username = localStorage.getItem('usersocketname');
+	feedback.html('');
+	console.log(username+" my account");
+	//Emit message
+	send_message.click(function(){
+		var messageBody = {message : message.val(),sender: username, recv : send_reciever_name};
+		socket.emit('new_message', messageBody);
+	})
 
-        </script>
+	//Listen on new_message
+	socket.on("new_message"+username, (data) => {
+		console.log(data);
+		var divmessage = document.createElement('div');
+
+			divmessage.className += "d-flex justify-content-end mb-4";
+
+			var content = '<div class="msg_cotainer_send">\
+						'+data.message+'\
+						<span class="msg_time_send">date</span>\
+					</div>\
+					<div class="img_cont_msg">\
+				<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
+					</div>\
+				</div>';
+				divmessage.innerHTML = content;
+		console.log(divmessage);
+		chatroom.append(divmessage);
+	});
+	socket.on("sending_message", (data) => {
+		var divmessage = document.createElement('div');
+			divmessage.className += "d-flex justify-content-start mb-4";
+			var content = '<div class="img_cont_msg">\
+				<img src="/views/bipul.jpg" \
+				class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
+			</div>\
+			<div class="msg_cotainer">\
+				'+data.message+'\
+				<span class="msg_time">date</span>\
+			</div>\
+			</div>';
+			divmessage.innerHTML = content;
+		console.log(divmessage);
+		chatroom.append(divmessage);
+	});
+
+	//Emit a username
+	send_username.click(function(){
+		socket.emit('change_username', {username : username});
+		console.log(username);
+	})
+
+	//Emit typing
+	message.bind("keypress", () => {
+		var messageBody = {recv : send_reciever_name};
+		socket.emit('typing', messageBody);
+	})
+
+	//Listen on typing
+	socket.on('typing'+username, (data) => {
+		var msg = document.getElementById("useristyping");
+		msg.innerHTML = "<p><i>" + data.recv + " is typing a message..." + "</i></p>";
+		$("#useristyping").fadeIn('slow').animate({opacity: 1.0}, 1500).effect("pulsate", { times: 2 }, 800).fadeOut('slow'); 
+	})
+}
+
+
+
+		</script>
+
 	</body>
 </html>

@@ -206,6 +206,7 @@ module.exports = function (conf) {
             devices = devices.map(function(el) {
                 var o = Object.assign({}, el);
                 o.isActive = true;
+                o.name = o.ip.split(".").join("");
                 return o;
             })
               
