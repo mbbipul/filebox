@@ -446,7 +446,10 @@ module.exports = function (conf) {
         });
 
     });
-    
+    app.get('/listeningon',function (req,res) {
+        var infowithfile = {"addresses":addresses,"port":port,"allowDeletion":allowDeletion};
+        res.json(infowithfile);
+    });
     app.get('/infowithfile',function(req, res) {
 
         if(disable.infowithfile) {

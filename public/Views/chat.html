@@ -19,8 +19,8 @@
 			.column {
 				float: left;
 				width: 50%;
-				padding-left: 12%;
-				padding-top: 20px;
+				padding-top: 10px;
+				padding-bottom: 20px;
 				color: white;
 				border-radius: 15px !important;
 				border: 1px solid blanchedalmond;
@@ -58,7 +58,6 @@
 		}
 
 		.filecart{
-			height: 430px;
 			border-radius: 15px !important;
 			overflow-y: auto;
 			white-space: nowrap;
@@ -303,10 +302,18 @@
 	right: 0;
 	top: 0;
 	}
-        </style>
-    </head>
-	<!--Coded With Love By Mutiullah Samim-->
-	<body>
+	.nav_button{
+  position: fixed;
+  margin-top:40px;
+  margin-left: 12px;
+}
+
+  </style>
+  
+</head>
+<body>
+  <button type="button" class="btn btn-outline-primary nav_button" ><a href="/">Back to home</a></button>
+
 		<div class="container-fluid h-100">
 			<div class="row  h-100">
 				<div class="col-md-3 col-xl-3 chat">
@@ -393,327 +400,354 @@ function gridView() {
 }
 
 /* Optional: Add active class to the current button (highlight it) */
-	var container = document.getElementById("btnContainer");
-	var btns = container.getElementsByClassName("btn_grid");
-	for (var i = 0; i < btns.length; i++) {
-		btns[i].addEventListener("click", function() {
-			var current = document.getElementsByClassName("actives");
-			current[0].className = current[0].className.replace(" actives", "");
-			this.className += " actives";
-		});
-	}
+		var container = document.getElementById("btnContainer");
+		var btns = container.getElementsByClassName("btn_grid");
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].addEventListener("click", function() {
+				var current = document.getElementsByClassName("actives");
+				current[0].className = current[0].className.replace(" actives", "");
+				this.className += " actives";
+			});
+		}
 
-	function updateLocalDeviceList(){
-		var xmlhttp = new XMLHttpRequest();
+		function updateLocalDeviceList(){
+			var xmlhttp = new XMLHttpRequest();
 
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-			var users = JSON.parse(this.responseText);
-				var userList = document.getElementById("chat_room_user_list");
-				userList.innerHTML = "";
-				users[0].forEach(user => {
-					addToChatList(userList,user);
-				});
-				var openChatIp = getUrlVars();
-				openChatIp = openChatIp[0];
-				var element;
-				// if(openChatIp!=null){
-				// 	element = document.getElementById(openChatIp);
-				// 	element.classList.add("submenu-active");
-				// 	//getUserInfoForOpenInChatRoom(openChatIp);
-				// 	initializeSocketIo();
-				// 	updateFileListByRoomId(openChatIp);
-				// 	updateMessageRoom(openChatIp);
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+				var users = JSON.parse(this.responseText);
+					var userList = document.getElementById("chat_room_user_list");
+					userList.innerHTML = "";
+					users[0].forEach(user => {
+						addToChatList(userList,user);
+					});
+					var openChatIp = getUrlVars();
+					openChatIp = openChatIp[0];
+					var element;
+					if(openChatIp!=null){
+						element = document.getElementById(openChatIp);
+						element.classList.add("submenu-active");
+						//getUserInfoForOpenInChatRoom(openChatIp);
+						getUserInfoForOpenInChatRoom(openChatIp);
+						updateFileListByRoomId(openChatIp);
+						updateMessageRoom(openChatIp);
 
-				// }
-				$('.contacts li').click(function (e) {
-					e.preventDefault();
-					$(this).closest('li').addClass('submenu-active').siblings().removeClass('submenu-active');
-					getUserInfoForOpenInChatRoom(this.id);
-					updateFileListByRoomId(this.id);
-					updateMessageRoom(this.id);
+					}
+					$('.contacts li').click(function (e) {
+						e.preventDefault();
+						$(this).closest('li').addClass('submenu-active').siblings().removeClass('submenu-active');
+						getUserInfoForOpenInChatRoom(this.id);
+						updateFileListByRoomId(this.id);
+						updateMessageRoom(this.id);
 
-				});
-			}
-		};
-		xmlhttp.open("GET", "/localdevices", true);
-		xmlhttp.send();
-	}
+					});
+				}
+			};
+			xmlhttp.open("GET", "/localdevices", true);
+			xmlhttp.send();
+		}
 
-	function addToChatList(userList,user){
-		var content ='<div class="d-flex bd-highlight">\
-			<div class="img_cont">\
-			<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"\
-			 class="rounded-circle user_img">\
-			<span class="online_icon"></span>\
-			</div>\
-			<div class="user_info">\
-				<span>'+user.name+'</span>\
-				<p>'+user.ip+'</p>\
+		function addToChatList(userList,user){
+			var content ='<div class="d-flex bd-highlight">\
+				<div class="img_cont">\
+				<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"\
+				class="rounded-circle user_img">\
+				<span class="online_icon"></span>\
 				</div>\
-			</div>';
-		var list_item = document.createElement("li");
-		list_item.id = user.ip;
-		list_item.innerHTML = content;
-		userList.append(list_item);
-	}
-	function getUserInfoForOpenInChatRoom(id) {
-		var xmlhttp = new XMLHttpRequest();
+				<div class="user_info">\
+					<span>'+user.name+'</span>\
+					<p>'+user.ip+'</p>\
+					</div>\
+				</div>';
+			var list_item = document.createElement("li");
+			list_item.id = user.ip;
+			list_item.innerHTML = content;
+			userList.append(list_item);
+		}
+		function getUserInfoForOpenInChatRoom(id) {
+			var xmlhttp = new XMLHttpRequest();
 
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				var user = JSON.parse(this.responseText);
-				updateChatRoom(user[0]);
-			
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var user = JSON.parse(this.responseText);
+					updateChatRoom(user[0]);
+				
+				}
+			};
+			xmlhttp.open("GET", "/getuserinfoforchatroom/"+id, true);
+			xmlhttp.send();
+		}
+
+
+			function clientCallback(data) {
+				data = JSON.parse(data);
+				data = data.split(".").join("");
+				console.log(data);
+				localStorage.setItem('usersocketname',data);
+
 			}
-		};
-		xmlhttp.open("GET", "/getuserinfoforchatroom/"+id, true);
-		xmlhttp.send();
-	}
 
+		function updateChatRoom(user){
+			getClientIp('/clientip', clientCallback);
 
-		function clientCallback(data) {
-			data = JSON.parse(data);
-			data = data.split(".").join("");
-			console.log(data);
-			localStorage.setItem('usersocketname',data);
+			var chatRoomHeader = document.getElementById('chat_room_header');
+			var chatRoomFooter = document.getElementById('chat_room_footer');
+			var content = '<div class="img_cont">\
+							<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">\
+							<span class="online_icon"></span>\
+						</div>\
+						<div class="user_info">\
+							<span>'+user.name+'</span>\
+							<p>1767 Messages</p>\
+						</div>';
+			var footer_content = '<div class="input-group">\
+										<div class="input-group-append">\
+												<input type="text" name="destip" \
+												value="'+user.ip+'" hidden>\
+											<span class="input-group-text attach_btn">\
+												<i class=" btn-upload fas fa-paperclip">\
+													<input type="file" id="file_room"\
+													name="file_room"  \
+													"/>\
+													</i></span>\
+										</div>\
+											<input id="recieverip" type="text" name="destip" \
+												value="'+user.name+'" hidden>\
+										<textarea name="message" id="message" class="form-control type_msg" \
+										placeholder="Type your message..."></textarea>\
+										<div class="input-group-append">\
+											<span  class="input-group-text "><i class="fas fa-location-arrow"  id="send_messageid"></i></span>\
+										</div>\
+									</div>';
+
+			chatRoomFooter.innerHTML = footer_content;
+			chatRoomHeader.innerHTML = content;
+			// $("#send_icon").click(function() {
+
+			// 	var url = "/updatemessage"; // the script where you handle the form input.
+
+			// 	$.ajax({
+			// 		type: "POST",
+			// 		url: url,
+			// 		data: $("#send_text_msg").serialize(), // serializes the form's elements.
+			// 		success: function(data)
+			// 		{
+			// 			alert(data); // show response from the php script.
+			// 		}
+			// 		});
+
+			// 	return false; // avoid to execute the actual submit of the form.
+			// });
+			initialize_socket_listner(user.name);
 
 		}
 
-	function updateChatRoom(user){
-		getClientIp('/clientip', clientCallback);
+		function addFileToList(listr,file){
+			var file_item = '<a href="./f/'+file.filename+'" download>'+file.filename+'<span style="font-size: xx-small;margin-top:5px;">\
+								112MB</span></a>\
+							';
+			var divlist = document.createElement('div');
+			divlist.className += "column";
+			// divlist.style = "background-image: url('/Views/bipul.jpg');background-repeat:no-repeat;background-size: contain;resize: both;"
+			divlist.innerHTML = file_item;
+			listr.append(divlist);
+		}
+		function updateFileListByRoomId(ip) {
 
-		var chatRoomHeader = document.getElementById('chat_room_header');
-		var chatRoomFooter = document.getElementById('chat_room_footer');
-		var content = '<div class="img_cont">\
-						<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">\
-						<span class="online_icon"></span>\
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var fileList = JSON.parse(this.responseText);
+					var listr = document.getElementById('file_list_by_frnd');
+					listr.innerHTML = "";
+					fileList.forEach(function(file){
+						addFileToList(listr,file);
+					});
+				
+				}
+			};
+			xmlhttp.open("GET", "/getsharedfilesbyip/"+ip, true);
+			xmlhttp.send();
+		}
+
+		function addMessageToRoom(msgroom,message){
+			getClientIp('/clientip', function (data) {
+				var divmessage = document.createElement('div');
+				var clientip = JSON.parse(data);
+				if(message.messageFrom == clientip){
+					divmessage.className += "d-flex justify-content-start mb-4";
+					var content = '<div class="img_cont_msg">\
+						<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" \
+						class="rounded-circle user_img_msg" avatar="'+message.messageFrom+'">\
 					</div>\
-					<div class="user_info">\
-						<span>'+user.name+'</span>\
-						<p>1767 Messages</p>\
-					</div>';
-		var footer_content = '<div class="input-group">\
-									<div class="input-group-append">\
-											<input type="text" name="destip" \
-											value="'+user.ip+'" hidden>\
-										<span class="input-group-text attach_btn">\
-											<i class=" btn-upload fas fa-paperclip">\
-												<input type="file" id="file_room"\
-												 name="file_room"  \
-												 "/>\
-												 </i></span>\
-									</div>\
-										<input id="recieverip" type="text" name="destip" \
-											value="'+user.name+'" hidden>\
-									<textarea name="message" id="message" class="form-control type_msg" \
-									placeholder="Type your message..."></textarea>\
-									<div class="input-group-append">\
-										<span  class="input-group-text "><button class="fas fa-location-arrow"  id="send_messageid"></button></span>\
-									</div>\
-								</div>';
-
-		chatRoomFooter.innerHTML = footer_content;
-		chatRoomHeader.innerHTML = content;
-		// $("#send_icon").click(function() {
-
-		// 	var url = "/updatemessage"; // the script where you handle the form input.
-
-		// 	$.ajax({
-		// 		type: "POST",
-		// 		url: url,
-		// 		data: $("#send_text_msg").serialize(), // serializes the form's elements.
-		// 		success: function(data)
-		// 		{
-		// 			alert(data); // show response from the php script.
-		// 		}
-		// 		});
-
-		// 	return false; // avoid to execute the actual submit of the form.
-		// });
-		initializeSocketIo(user.name);
-
-	}
-
-	function addFileToList(listr,file){
-		var file_item = '<figure></figure>\
-						<a href="./f/'+file.filename+'" download>'+file.filename+'<span style="font-size: xx-small;margin-top:5px;">\
-							112MB</span></a>\
-						<span>12-12-2019 </span>';
-		var divlist = document.createElement('div');
-		divlist.className += "column";
-		divlist.style = "background-image: url('/Views/bipul.jpg');background-repeat:no-repeat;background-size: contain;resize: both;"
-		divlist.innerHTML = file_item;
-		listr.append(divlist);
-	}
-	function updateFileListByRoomId(ip) {
-
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				var fileList = JSON.parse(this.responseText);
-				var listr = document.getElementById('file_list_by_frnd');
-				listr.innerHTML = "";
-				fileList.forEach(function(file){
-					addFileToList(listr,file);
-				});
-			
-			}
-		};
-		xmlhttp.open("GET", "/getsharedfilesbyip/"+ip, true);
-		xmlhttp.send();
-	}
-
-	function addMessageToRoom(msgroom,message){
-		getClientIp('/clientip', function (data) {
-			var divmessage = document.createElement('div');
-			var clientip = JSON.parse(data);
-			if(message.messageFrom == clientip){
-				divmessage.className += "d-flex justify-content-start mb-4";
-				var content = '<div class="img_cont_msg">\
-					<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" \
-					class="rounded-circle user_img_msg" avatar="'+message.messageFrom+'">\
-				</div>\
-				<div class="msg_cotainer">\
-					'+message.message+'\
-					<span class="msg_time">'+Date.parse(message.date)+'</span>\
-				</div>\
-				</div>';
-				divmessage.innerHTML = content;
-			}else{
-				divmessage.className += "d-flex justify-content-end mb-4";
-
-				var content = '<div class="msg_cotainer_send">\
-							'+message.message+'\
-							<span class="msg_time_send">'+Date.parse(message.date)+'</span>\
-						</div>\
-						<div class="img_cont_msg">\
-					<img src="/views/bipul.jpg" class="rounded-circle user_img_msg" avatar="'+message.messageFrom+'">\
-						</div>\
+					<div class="msg_cotainer">\
+						'+message.message+'\
+						<span class="msg_time">'+Date.parse(message.date)+'</span>\
+					</div>\
 					</div>';
 					divmessage.innerHTML = content;
-			}
-			msgroom.append(divmessage);
-		});
+				}else{
+					divmessage.className += "d-flex justify-content-end mb-4";
 
-	}
-	function updateMessageRoom(ip){
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				var messages = JSON.parse(this.responseText);
-				var msgroom = document.getElementById('message_room');
-				msgroom.innerHTML = "";
-				messages.forEach(function(message){
-					addMessageToRoom(msgroom,message);
-				});
-			
-			}
-		};
-		xmlhttp.open("POST", "/getallmessagebyip/"+ip, true);
-		xmlhttp.send();
-	}
-	const getClientIp = function(url, callback){
-			var request = new XMLHttpRequest();
-			request.onreadystatechange = function()
-			{
-				if (request.readyState == 4 && request.status == 200)
-				{
-					callback(request.responseText); // Another callback here
+					var content = '<div class="msg_cotainer_send">\
+								'+message.message+'\
+								<span class="msg_time_send">'+Date.parse(message.date)+'</span>\
+							</div>\
+							<div class="img_cont_msg">\
+						<img src="/views/bipul.jpg" class="rounded-circle user_img_msg" avatar="'+message.messageFrom+'">\
+							</div>\
+						</div>';
+						divmessage.innerHTML = content;
 				}
-			}; 
-			request.open('GET', url);
-			request.send();
-	}
-	
-	function getUrlVars()
-	{
-		var vars = [], hash;
-		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-		for(var i = 0; i < hashes.length; i++)
-		{
-			hash = hashes[i].split('=');
-			vars.push(hash[0]);
-			vars[hash[0]] = hash[1];
+				msgroom.append(divmessage);
+			});
+
 		}
-		return vars;
-	}
-	updateLocalDeviceList();
-function initializeSocketIo(reciever){
-   	//make connection
-	var socket = io.connect('http://192.168.0.6:8080');
-	console.log(socket);
-	//buttons and inputs;
-	var message = $("#message");
-	var send_username =$("#send_messageid");
-	var send_message = $("#send_messageid");
-	var send_reciever_name = reciever;
-	var chatroom = $("#message_room");
-	var feedback = $("#feedback");
-	var username = localStorage.getItem('usersocketname');
-	feedback.html('');
-	console.log(username+" my account");
-	//Emit message
-	send_message.click(function(){
-		var messageBody = {message : message.val(),sender: username, recv : send_reciever_name};
-		socket.emit('new_message', messageBody);
-	})
+		function updateMessageRoom(ip){
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var messages = JSON.parse(this.responseText);
+					var msgroom = document.getElementById('message_room');
+					msgroom.innerHTML = "";
+					messages.forEach(function(message){
+						addMessageToRoom(msgroom,message);
+					});
+				
+				}
+			};
+			xmlhttp.open("POST", "/getallmessagebyip/"+ip, true);
+			xmlhttp.send();
+		}
+		const getClientIp = function(url, callback){
+				var request = new XMLHttpRequest();
+				request.onreadystatechange = function()
+				{
+					if (request.readyState == 4 && request.status == 200)
+					{
+						callback(request.responseText); // Another callback here
+					}
+				}; 
+				request.open('GET', url);
+				request.send();
+		}
+		
+		function getUrlVars()
+		{
+			var vars = [], hash;
+			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+			for(var i = 0; i < hashes.length; i++)
+			{
+				hash = hashes[i].split('=');
+				vars.push(hash[0]);
+				vars[hash[0]] = hash[1];
+			}
+			return vars;
+		}
+		updateLocalDeviceList();
+		
+		function initialize_socket_listner(reciever) {
+			var request = new XMLHttpRequest();
+			request.open('GET', '/listeningon', true);
+			
+			var onError = function (caller) {
+			//TODO check if offline (or server is down)
+			console.log(request);
+			}
+			
+			request.onload = function() {
+			if (request.status >= 200 && request.status < 400) {
+				// Success!
+				var resp = request.responseText;
+				var data = JSON.parse(resp);
+				initializeSocketIo(data.addresses,data.port,reciever);
+			} else {
+				onError(0);
+			}
+			};
+			
+			request.onerror = function(){onError(1);};
+			
+			request.send();
+		
+		}
+		function initializeSocketIo(address,port,reciever){
+			
+			//make connection
+			var socket = io.connect('http://'+address[1]+":"+port);
+			console.log('http://'+address[1]+":"+port);
+			console.log(socket);
+			//buttons and inputs;
+			var message = $("#message");
+			var send_username =$("#send_messageid");
+			var send_message = $("#send_messageid");
+			var send_reciever_name = reciever;
+			var chatroom = $("#message_room");
+			var feedback = $("#feedback");
+			var username = localStorage.getItem('usersocketname');
+			feedback.html('');
+			console.log(username+" my account");
+			//Emit message
+			send_message.click(function(){
+				var messageBody = {message : message.val(),sender: username, recv : send_reciever_name};
+				socket.emit('new_message', messageBody);
+			})
 
-	//Listen on new_message
-	socket.on("new_message"+username, (data) => {
-		console.log(data);
-		var divmessage = document.createElement('div');
+			//Listen on new_message
+			socket.on("new_message"+username, (data) => {
+				console.log(data);
+				var divmessage = document.createElement('div');
 
-			divmessage.className += "d-flex justify-content-end mb-4";
+					divmessage.className += "d-flex justify-content-end mb-4";
 
-			var content = '<div class="msg_cotainer_send">\
+					var content = '<div class="msg_cotainer_send">\
+								'+data.message+'\
+								<span class="msg_time_send">date</span>\
+							</div>\
+							<div class="img_cont_msg">\
+						<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
+							</div>\
+						</div>';
+						divmessage.innerHTML = content;
+				console.log(divmessage);
+				chatroom.append(divmessage);
+			});
+			socket.on("sending_message", (data) => {
+				var divmessage = document.createElement('div');
+					divmessage.className += "d-flex justify-content-start mb-4";
+					var content = '<div class="img_cont_msg">\
+						<img src="/views/bipul.jpg" \
+						class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
+					</div>\
+					<div class="msg_cotainer">\
 						'+data.message+'\
-						<span class="msg_time_send">date</span>\
+						<span class="msg_time">date</span>\
 					</div>\
-					<div class="img_cont_msg">\
-				<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
-					</div>\
-				</div>';
-				divmessage.innerHTML = content;
-		console.log(divmessage);
-		chatroom.append(divmessage);
-	});
-	socket.on("sending_message", (data) => {
-		var divmessage = document.createElement('div');
-			divmessage.className += "d-flex justify-content-start mb-4";
-			var content = '<div class="img_cont_msg">\
-				<img src="/views/bipul.jpg" \
-				class="rounded-circle user_img_msg" avatar="'+data.sender+'">\
-			</div>\
-			<div class="msg_cotainer">\
-				'+data.message+'\
-				<span class="msg_time">date</span>\
-			</div>\
-			</div>';
-			divmessage.innerHTML = content;
-		console.log(divmessage);
-		chatroom.append(divmessage);
-	});
+					</div>';
+					divmessage.innerHTML = content;
+				console.log(divmessage);
+				chatroom.append(divmessage);
+			});
 
-	//Emit a username
-	send_username.click(function(){
-		socket.emit('change_username', {username : username});
-		console.log(username);
-	})
+			//Emit a username
+			send_username.click(function(){
+				socket.emit('change_username', {username : username});
+				console.log(username);
+			})
 
-	//Emit typing
-	message.bind("keypress", () => {
-		var messageBody = {recv : send_reciever_name};
-		socket.emit('typing', messageBody);
-	})
+			//Emit typing
+			message.bind("keypress", () => {
+				var messageBody = {recv : send_reciever_name};
+				socket.emit('typing', messageBody);
+			})
 
-	//Listen on typing
-	socket.on('typing'+username, (data) => {
-		var msg = document.getElementById("useristyping");
-		msg.innerHTML = "<p><i>" + data.recv + " is typing a message..." + "</i></p>";
-		$("#useristyping").fadeIn('slow').animate({opacity: 1.0}, 1500).effect("pulsate", { times: 2 }, 800).fadeOut('slow'); 
-	})
-}
+			//Listen on typing
+			socket.on('typing'+username, (data) => {
+				var msg = document.getElementById("useristyping");
+				msg.innerHTML = "<p><i>" + data.recv + " is typing a message..." + "</i></p>";
+				$("#useristyping").fadeIn('slow').animate({opacity: 1.0}, 1500).effect("pulsate", { times: 2 }, 800).fadeOut('slow'); 
+			})
+		}
 
 
 

@@ -350,11 +350,19 @@ input#fileToUpload {
   right: 0;
   top: 0;
 }
+
+.nav_button{
+  position: fixed;
+  margin-top:40px;
+  margin-left: 125px;
+}
+
   </style>
   
 </head>
 <body>
-  
+  <button type="button" class="btn btn-outline-primary nav_button" ><a href="/chat">Open Chat Room</a></button>
+
   <div class="container">
       <h1 class="text-center"> File Box</h1> 
 
@@ -421,8 +429,8 @@ input#fileToUpload {
         <table class="table">
           <thead>
             <tr>
-              <th scope="col">device id</th>
-              <th scope="col">device ip</th>
+              <th scope="col">Username</th>
+              <th scope="col">User Ip</th>
             </tr>
           </thead>
           <tbody id="local_device_list">
